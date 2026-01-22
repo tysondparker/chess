@@ -1,13 +1,17 @@
-package chess;
+package chess.piecemoves;
+
+import chess.ChessBoard;
+import chess.ChessMove;
+import chess.ChessPosition;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class Bishopmovecalc implements PieceMovesCalculator {
+public class Rookmovecalc implements PieceMovesCalculator {
     @Override
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
         Collection<ChessMove> moves = new ArrayList<>();
-        int[][] increments = {{1, 1}, {1, -1}, {-1, -1}, {-1, 1}};
+        int[][] increments = {{1, 0}, {-1, 0}, {0, -1}, {0, 1}};
 
         for (int i = 0; i < 4; i++) {
             int[] curpos = {position.getRow(), position.getColumn()};
