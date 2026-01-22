@@ -1,5 +1,6 @@
 package chess;
 
+
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -33,6 +34,9 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
+        if (position.getRow() < 1 || position.getRow() > 8 || position.getColumn() < 1 || position.getColumn() > 8) {
+            return null;
+        }
         return squares[position.getRow()-1][position.getColumn()-1 ];
     }
     /**
@@ -40,7 +44,69 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        throw new RuntimeException("Not implemented");
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                if (row == 2) {
+                    ChessPiece Pawn = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
+                    this.addPiece(new ChessPosition(row,col),Pawn);
+                }
+                if (row == 7) {
+                    ChessPiece Pawn = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN);
+                    this.addPiece(new ChessPosition(row,col),Pawn);
+                }
+
+
+                if (row == 8 && col == 1 || row == 8 && col == 8) {
+                    ChessPiece Rook = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK);
+                    this.addPiece(new ChessPosition(row,col),Rook);
+                }
+                if (row == 1 && col == 1 || row == 1 && col == 8) {
+                    ChessPiece Rook = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK);
+                    this.addPiece(new ChessPosition(row,col),Rook);
+                }
+
+
+                if (row == 8 && col == 2 || row == 8 && col == 7) {
+                    ChessPiece n = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT);
+                    this.addPiece(new ChessPosition(row,col),n);
+                }
+                if (row == 1 && col == 2 || row == 1 && col == 7) {
+                    ChessPiece n = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT);
+                    this.addPiece(new ChessPosition(row,col),n);
+                }
+
+
+                if (row == 8 && col == 3 || row == 8 && col == 6) {
+                    ChessPiece b = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.BISHOP);
+                    this.addPiece(new ChessPosition(row,col),b);
+                }
+                if (row == 1 && col == 3 || row == 1 && col == 6) {
+                    ChessPiece b = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP);
+                    this.addPiece(new ChessPosition(row,col),b);
+                }
+
+
+                if (row == 8 && col == 4) {
+                    ChessPiece q = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.QUEEN);
+                    this.addPiece(new ChessPosition(row,col),q);
+                }
+                if (row == 1 && col == 4) {
+                    ChessPiece q = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN);
+                    this.addPiece(new ChessPosition(row,col),q);
+                }
+
+                if (row == 8 && col == 5) {
+                    ChessPiece k = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KING);
+                    this.addPiece(new ChessPosition(row,col),k);
+                }
+                if (row == 1 && col == 5) {
+                    ChessPiece k = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KING);
+                    this.addPiece(new ChessPosition(row,col),k);
+                }
+
+
+            }
+        }
     }
 
     @Override
@@ -55,5 +121,12 @@ public class ChessBoard {
     @Override
     public int hashCode() {
         return Arrays.deepHashCode(squares);
+    }
+
+    @Override
+    public String toString() {
+        return "ChessBoard{" +
+                "squares=" + Arrays.toString(squares) +
+                '}';
     }
 }
