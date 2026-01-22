@@ -1,9 +1,6 @@
 package chess;
 
-import chess.piecemoves.Bishopmovecalc;
-import chess.piecemoves.Pawnmovecalc;
-import chess.piecemoves.Queenmovecalc;
-import chess.piecemoves.Rookmovecalc;
+import chess.piecemoves.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -83,6 +80,8 @@ public class ChessPiece {
             moves = new Pawnmovecalc().pieceMoves(board,myPosition);
         } else if (piece.getPieceType() == PieceType.QUEEN) {
             moves = new Queenmovecalc().pieceMoves(board, myPosition);
+        } else if (piece.getPieceType() == PieceType.KNIGHT) {
+            moves = new Knightmovecalc().pieceMoves(board, myPosition);
         }
         return moves;
     }
