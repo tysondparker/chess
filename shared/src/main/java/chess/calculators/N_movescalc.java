@@ -1,0 +1,46 @@
+package chess.calculators;
+
+import chess.ChessBoard;
+import chess.ChessMove;
+import chess.ChessPiece;
+import chess.ChessPosition;
+
+import java.util.ArrayList;
+import java.util.Collection;
+
+public class N_movescalc implements moves_calc{
+
+    @Override
+    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
+
+//        set everything up
+        int [][] direct = {{1,2},{2,1},{-1,2},{-2,1},{-1,-2},{-2,-1},{1,-2},{2,-1}};
+        ChessPiece mypiece = board.getPiece(myPosition);
+        Collection<ChessMove> list_of_moves = new ArrayList<>();
+
+
+//        For Loop
+        for (int i = 0; i < 8; i++) {
+
+            int row = myPosition.getRow();
+            int col = myPosition.getColumn();
+
+            if (row + direct[i][0] <= 8 && row + direct[i][0] >= 1 && col + direct[i][1] <= 8 && col + direct[i][1] >= 1) {
+                row += direct[i][0];
+                col += direct[i][1];
+//                no piece there
+                ChessPiece new_tile = board.getPiece(new ChessPosition(row,col));
+                if(new_tile == null) {
+                    ChessPosition new_position = new ChessPosition(row, col);
+                    list_of_moves.add(new ChessMove(myPosition,new_position, null));
+                }
+//                enemy piece there
+                else if(new_tile.getTeamColor() != mypiece.getTeamColor()) {
+                    ChessPosition new_position = new ChessPosition(row, col);
+                    list_of_moves.add(new ChessMove(myPosition,new_position, null));
+                }
+            }
+        }
+        return list_of_moves;
+    }
+}
