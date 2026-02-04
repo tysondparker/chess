@@ -34,25 +34,6 @@ public class ChessGame {
         current_team = team;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        ChessGame chessGame = (ChessGame) o;
-        return current_team == chessGame.current_team && Objects.equals(current_board, chessGame.current_board);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(current_team, current_board);
-    }
-
-    @Override
-    public String toString() {
-        return String.format("%s",current_board);
-    }
-
     /**
      * Enum identifying the 2 possible teams in a chess game
      */
@@ -90,8 +71,8 @@ public class ChessGame {
      */
     public ChessPosition find_king(TeamColor king_color) {
         ChessPosition final_pos = new ChessPosition(0,0);
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
+        for (int i = 1; i < 9; i++) {
+            for (int j = 1; j < 9; j++) {
                 ChessPosition cur_pos = new ChessPosition(i,j);
                 if (current_board.getPiece(cur_pos) != null && current_board.getPiece(cur_pos).getPieceType() == ChessPiece.PieceType.KING && current_board.getPiece(cur_pos).getTeamColor() == king_color){
                     final_pos = cur_pos;
@@ -103,8 +84,8 @@ public class ChessGame {
 
     public boolean isInCheck(TeamColor teamColor) {
         ChessPosition king_position = find_king(teamColor);
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
+        for (int i = 1; i <= 8; i++) {
+            for (int j = 1; j <= 8; j++) {
                 ChessPosition cur_pos = new ChessPosition(i,j);
                 ChessPiece cur_piece = current_board.getPiece(cur_pos);
                 if (cur_piece != null && cur_piece.getTeamColor() !=  teamColor){
@@ -158,5 +139,24 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         return current_board;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessGame chessGame = (ChessGame) o;
+        return current_team == chessGame.current_team && Objects.equals(current_board, chessGame.current_board);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(current_team, current_board);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s",current_board);
     }
 }

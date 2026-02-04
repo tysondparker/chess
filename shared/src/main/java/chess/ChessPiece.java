@@ -36,6 +36,31 @@ public class ChessPiece {
         return Objects.hash(pieceColor, type);
     }
 
+    @Override
+    public String toString() {
+        if(type == PieceType.KING) {
+            return "[K]";
+        }
+        else if(type == PieceType.QUEEN) {
+            return "[Q]";
+        }
+        else if(type == PieceType.KNIGHT) {
+            return "[N]";
+        }
+        else if(type == PieceType.ROOK) {
+            return "[R]";
+        }
+        else if(type == PieceType.BISHOP) {
+            return "[B]";
+        }
+        else if(type == PieceType.PAWN) {
+            return "[P]";
+        }
+        else {
+            return "";
+        }
+    }
+
     /**
      * The various different chess piece options
      */

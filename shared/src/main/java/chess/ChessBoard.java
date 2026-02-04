@@ -14,7 +14,6 @@ public class ChessBoard {
     ChessPiece [][] board = new ChessPiece[8][8];
 
     public ChessBoard() {
-
     }
 
     /**
@@ -43,6 +42,7 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
+        board = new ChessPiece[8][8];
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 if (i == 0) {
@@ -90,5 +90,24 @@ public class ChessBoard {
     @Override
     public int hashCode() {
         return Arrays.deepHashCode(board);
+    }
+
+    @Override
+    public String toString() {
+        String final_string = "";
+        for (int i = 1; i <= 8; i++) {
+            if(i!=1) {
+                final_string+="\n";
+            }
+            for (int j = 1; j <= 8; j++) {
+                ChessPiece piece = this.getPiece(new ChessPosition(i,j));
+                if (piece == null) {
+                    final_string += "[0]";
+                } else {
+                    final_string += String.format("%s", piece);
+                }
+            }
+        }
+        return final_string;
     }
 }
