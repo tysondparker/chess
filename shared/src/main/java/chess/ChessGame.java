@@ -176,11 +176,11 @@ public class ChessGame {
             ChessGame test_game = new ChessGame();
             test_game.current_board = test_board;
 
-            if (!test_game.isInCheck(piece.getTeamColor())) {
-                return false;
+            if (test_game.isInCheck(piece.getTeamColor())) {
+                return true;
             }
         }
-        return true;
+        return false;
     }
 
     /**
@@ -263,7 +263,7 @@ public class ChessGame {
         ChessPiece king_piece = current_board.getPiece(king_position);
         Collection<ChessMove> all_possible_king_moves = king_piece.pieceMoves(current_board, king_position);
 
-        if (!search_piece_moves(all_possible_king_moves, king_piece, king_position)) {
+        if (search_piece_moves(all_possible_king_moves, king_piece, king_position)) {
             return false;
         }
 
@@ -271,7 +271,7 @@ public class ChessGame {
             ChessPiece cur_piece = current_board.getPiece(piece);
             if(cur_piece.getPieceType() != ChessPiece.PieceType.KING){
                 Collection<ChessMove> all_moves = cur_piece.pieceMoves(current_board,piece);
-                if(!search_piece_moves(all_moves,cur_piece,piece)) {
+                if(search_piece_moves(all_moves,cur_piece,piece)) {
                     return false;
                 }
             }
