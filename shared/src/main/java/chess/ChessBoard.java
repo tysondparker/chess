@@ -15,7 +15,21 @@ public class ChessBoard {
 
     public ChessBoard() {
     }
+    public ChessBoard deepCopy() {
+        ChessBoard copy_board = new ChessBoard();
 
+        for (int i = 1; i <= 8; i++) {
+            for (int j = 1; j <= 8 ; j++) {
+                ChessPiece piece = this.getPiece(new ChessPosition(i,j));
+                if (piece != null) {
+                    ChessPiece copy_piece = new ChessPiece(piece.getTeamColor(),piece.getPieceType());
+                    copy_board.addPiece(new ChessPosition(i,j),copy_piece);
+                }
+            }
+
+        }
+        return copy_board;
+    }
     /**
      * Adds a chess piece to the chessboard
      *
@@ -102,7 +116,7 @@ public class ChessBoard {
             for (int j = 1; j <= 8; j++) {
                 ChessPiece piece = this.getPiece(new ChessPosition(i,j));
                 if (piece == null) {
-                    final_string += "[0]";
+                    final_string += "[ ]";
                 } else {
                     final_string += String.format("%s", piece);
                 }
