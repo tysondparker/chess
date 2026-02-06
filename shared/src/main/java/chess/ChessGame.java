@@ -1,6 +1,5 @@
 package chess;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
@@ -244,21 +243,7 @@ public class ChessGame {
         ChessPiece king_piece = current_board.getPiece(king_position);
         Collection<ChessMove> all_possible_king_moves = king_piece.pieceMoves(current_board,king_position);
 
-        if (!search_piece_moves(all_possible_king_moves, king_piece, king_position)) {
-            return false;
-        }
-        return true;
-//
-//            for(ChessPosition piece : all_pieces) {
-//                ChessPiece cur_piece = current_board.getPiece(piece);
-//                if(cur_piece.getPieceType() != ChessPiece.PieceType.KING){
-//                    Collection<ChessMove> all_moves = cur_piece.pieceMoves(current_board,piece);
-//                    if(!search_piece_moves(all_moves,cur_piece,piece)) {
-//                        return false;
-//                    }
-//                }
-//            }
-//        return true;
+        return search_piece_moves(all_possible_king_moves, king_piece, king_position);
     }
 
     /**
