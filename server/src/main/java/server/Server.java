@@ -1,8 +1,8 @@
 package server;
 
 import dataaccess.*;
-import service.LoginRequest;
-import service.RegisterRequest;
+import dataaccess.exception.*;
+import service.RequestAndResult.*;
 import com.google.gson.Gson;
 import io.javalin.*;
 import io.javalin.http.Context;
@@ -28,9 +28,15 @@ public class Server {
             ctx.json(body);
         });
 
-        javalin.exception(BadRequestException.class,(ex, ctx)-> {
+        javalin.exception(UnauthorizedException.class,(ex, ctx)-> {
             var body = new Gson().toJson(Map.of("message",String.format(ex.getMessage())));
             ctx.status(401);
+            ctx.json(body);
+        });
+
+        javalin.exception(BadRequestException.class,(ex, ctx)-> {
+            var body = new Gson().toJson(Map.of("message",String.format(ex.getMessage())));
+            ctx.status(400);
             ctx.json(body);
         });
 
@@ -63,7 +69,8 @@ public class Server {
     }
 
     private void logout(Context ctx) throws Exception {
-        LogoutRequest request = new Gson().fromJson(ctx.body(), LogoutRequest.class);
+        String AuthToken = ctx.header("Authorization");
+        LogoutRequest request = new LogoutRequest(AuthToken);
         service.logout(request);
         ctx.status(200);
         ctx.result("{}");

@@ -1,8 +1,12 @@
 package service;
 
 import dataaccess.*;
-import dataaccess.DataAccessException;
+import dataaccess.exception.AlreadyTakenException;
+import dataaccess.exception.BadRequestException;
+import dataaccess.exception.DataAccessException;
+import dataaccess.exception.UnauthorizedException;
 import model.*;
+import service.RequestAndResult.*;
 
 import static java.util.UUID.randomUUID;
 
@@ -33,8 +37,12 @@ public class UserService {
     }
 
     public LoginResult login(LoginRequest request) throws DataAccessException {
-        if (dataAccess.getUser(request.username()) == null || !dataAccess.getUser(request.username()).password().equals(request.password())) {
+        if (request.username() == null || request.password() == null) {
             throw new BadRequestException("Error: Bad Request");
+        }
+
+        if (dataAccess.getUser(request.username()) == null || !dataAccess.getUser(request.username()).password().equals(request.password())) {
+            throw new UnauthorizedException("Error: Bad Request");
         }
 
         UserData user = dataAccess.getUser(request.username());
@@ -47,13 +55,14 @@ public class UserService {
     }
 
     public void logout(LogoutRequest request) throws DataAccessException {
-        if (dataAccess.getAuth(request.authToken()) == null) {
-            throw new BadRequestException("Error: Bad Request");
+        if (request.authToken() == null || dataAccess.getAuth(request.authToken()) == null) {
+            throw new UnauthorizedException("Error: Bad Request");
         }
 
         AuthData authData = dataAccess.getAuth(request.authToken());
 
         dataAccess.deleteAuth(authData.authToken());
+        dataAccess.deleteAuth(authData.username());
     }
 
 

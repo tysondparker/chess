@@ -1,11 +1,12 @@
 package dataaccess;
 
+import dataaccess.exception.DataAccessException;
 import model.*;
 import java.util.*;
 
 public class MemoryDataAccess implements DataAccess {
     private final Map<String, UserData> users = new HashMap<>();
-    private final Map<String, String> authTokens = new HashMap<>();
+    private final Map<String, AuthData> authTokens = new HashMap<>();
 
     @Override
     public UserData getUser(String username) throws DataAccessException {
@@ -19,12 +20,12 @@ public class MemoryDataAccess implements DataAccess {
 
     @Override
     public void createAuth(AuthData authData) throws DataAccessException {
-        authTokens.put(authData.authToken(),authData.username());
+        authTokens.put(authData.authToken(), authData);
     }
 
     @Override
-    public AuthData getAuth(String username) throws DataAccessException {
-        return null;
+    public AuthData getAuth(String AuthToken) throws DataAccessException {
+        return authTokens.get(AuthToken);
     }
 
     @Override

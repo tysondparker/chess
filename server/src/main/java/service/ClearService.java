@@ -1,13 +1,7 @@
 package service;
 
-import dataaccess.AlreadyTakenException;
-import dataaccess.BadRequestException;
 import dataaccess.DataAccess;
-import dataaccess.DataAccessException;
-import model.AuthData;
-import model.UserData;
-
-import static java.util.UUID.randomUUID;
+import dataaccess.exception.DataAccessException;
 
 public class ClearService {
 
