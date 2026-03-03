@@ -19,12 +19,14 @@ public class Server {
     private final UserService service;
     private final GameService gameService;
     private final DataAccess dataAccess;
+    private final ClearService clearService;
 
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
         this.dataAccess = new MemoryDataAccess();
         this.service = new UserService(dataAccess);
         this.gameService = new GameService(dataAccess);
+        this.clearService = new ClearService(dataAccess);
 
 //        Already taken 403
         javalin.exception(AlreadyTakenException.class,(ex, ctx)-> {
@@ -89,7 +91,6 @@ public class Server {
     }
 
     private void clear(Context ctx) throws Exception {
-        ClearService clearService = new ClearService(dataAccess);
         clearService.clear();
         ctx.status(200);
         ctx.result("{}");
