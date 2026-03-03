@@ -3,8 +3,7 @@ package service;
 import dataaccess.MemoryDataAccess;
 import dataaccess.exception.*;
 import org.junit.jupiter.api.*;
-import service.RequestAndResult.RegisterRequest;
-import service.RequestAndResult.RegisterResult;
+import service.RequestAndResult.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -29,6 +28,27 @@ class UserServiceTest {
     void registerNegative() throws Exception {
         RegisterRequest request = new RegisterRequest("",null,"donutluver@gmail.com");
         assertThrows(BadRequestException.class, () -> service.register(request));
+    }
+
+    @Test
+    void loginPositive() throws Exception {
+        RegisterRequest registerRequest = new RegisterRequest("DonutLarry","Donuts4life","donutluver@gmail.com");
+        service.register(registerRequest);
+
+        LoginRequest request = new LoginRequest("DonutLarry","Donuts4life");
+        LoginResult result = service.login(request);
+
+        assertEquals("DonutLarry", result.username());
+        assertNotNull(result.authToken());
+    }
+
+    @Test
+    void loginNegative() throws Exception {
+        RegisterRequest registerRequest = new RegisterRequest("DonutLarry","Donuts4life","donutluver@gmail.com");
+        service.register(registerRequest);
+
+        LoginRequest request = new LoginRequest("DonutLarry","Donuts4lif");
+        assertThrows(UnauthorizedException.class, () -> service.login(request));
     }
 }
 
