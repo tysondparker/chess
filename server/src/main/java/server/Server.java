@@ -18,12 +18,11 @@ public class Server {
     private final Javalin javalin;
     private final UserService service;
     private final GameService gameService;
-    private final DataAccess dataAccess;
     private final ClearService clearService;
 
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
-        this.dataAccess = new MemoryDataAccess();
+        DataAccess dataAccess = new MemoryDataAccess();
         this.service = new UserService(dataAccess);
         this.gameService = new GameService(dataAccess);
         this.clearService = new ClearService(dataAccess);
