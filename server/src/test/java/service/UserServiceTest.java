@@ -50,5 +50,36 @@ class UserServiceTest {
         LoginRequest request = new LoginRequest("DonutLarry","Donuts4lif");
         assertThrows(UnauthorizedException.class, () -> service.login(request));
     }
+
+    @Test
+    void logoutPositive() throws Exception {
+        RegisterRequest registerRequest = new RegisterRequest("DonutLarry","Donuts4life","donutluver@gmail.com");
+        RegisterResult rr = service.register(registerRequest);
+
+        LoginRequest request = new LoginRequest("DonutLarry","Donuts4life");
+        LoginResult result = service.login(request);
+
+        String token = result.authToken();
+
+        LogoutRequest logoutRequest = new LogoutRequest(token);
+        service.logout(logoutRequest);
+
+        assertThrows(UnauthorizedException.class, () -> service.logout(new LogoutRequest(token)));
+    }
+
+    @Test
+    void logoutInvalidToken() throws Exception {
+
+        RegisterRequest registerRequest = new RegisterRequest("DonutLarry", "Donuts4life", "donutluver@gmail.com");
+        service.register(registerRequest);
+
+        LoginResult loginResult = service.login(new LoginRequest("DonutLarry", "Donuts4life"));
+
+        LogoutRequest badLogout = new LogoutRequest("thisIsNotARealToken");
+
+        assertThrows(UnauthorizedException.class, () -> service.logout(badLogout));
+
+        assertDoesNotThrow(() -> service.logout(new LogoutRequest(loginResult.authToken())));
+    }
 }
 
