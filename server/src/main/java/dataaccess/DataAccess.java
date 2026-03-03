@@ -1,8 +1,11 @@
 package dataaccess;
 
 import dataaccess.exception.DataAccessException;
-import model.AuthData;
-import model.UserData;
+import model.*;
+import service.RequestAndResult.ListGamesRequest;
+
+import java.util.List;
+import java.util.Map;
 
 public interface DataAccess {
     UserData getUser(String username) throws DataAccessException;
@@ -11,4 +14,9 @@ public interface DataAccess {
     AuthData getAuth(String username) throws DataAccessException;
     void clear() throws DataAccessException;
     void deleteAuth(String authData) throws DataAccessException;
+
+    int createGame(GameData data) throws DataAccessException;
+    GameData getGame(int gameId) throws DataAccessException;
+    void updateGame(GameData gameId) throws DataAccessException;
+    List<GameData> listGame() throws DataAccessException;
 }

@@ -1,10 +1,7 @@
 package service;
 
 import dataaccess.*;
-import dataaccess.exception.AlreadyTakenException;
-import dataaccess.exception.BadRequestException;
-import dataaccess.exception.DataAccessException;
-import dataaccess.exception.UnauthorizedException;
+import dataaccess.exception.*;
 import model.*;
 import service.RequestAndResult.*;
 
@@ -64,6 +61,4 @@ public class UserService {
         dataAccess.deleteAuth(authData.authToken());
         dataAccess.deleteAuth(authData.username());
     }
-
-
 }
