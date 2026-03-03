@@ -17,10 +17,10 @@ public class UserService {
 
     public RegisterResult register(RegisterRequest request) throws DataAccessException {
         if ((request.username() == null || request.password() == null || request.email() == null)) {
-            throw new BadRequestException("Error: Missing Information");
+            throw new BadRequestException("Error: bad request");
         }
         if (dataAccess.getUser(request.username()) != null) {
-            throw new AlreadyTakenException("Error: Username Taken");
+            throw new AlreadyTakenException("Error: already taken");
         }
 
         UserData NewUserData = new UserData(request.username(), request.password(), request.email());
@@ -35,11 +35,11 @@ public class UserService {
 
     public LoginResult login(LoginRequest request) throws DataAccessException {
         if (request.username() == null || request.password() == null) {
-            throw new BadRequestException("Error: Bad Request");
+            throw new BadRequestException("Error: bad request");
         }
 
         if (dataAccess.getUser(request.username()) == null || !dataAccess.getUser(request.username()).password().equals(request.password())) {
-            throw new UnauthorizedException("Error: Bad Request");
+            throw new UnauthorizedException("Error: bad request");
         }
 
         UserData user = dataAccess.getUser(request.username());
@@ -53,7 +53,7 @@ public class UserService {
 
     public void logout(LogoutRequest request) throws DataAccessException {
         if (request.authToken() == null || dataAccess.getAuth(request.authToken()) == null) {
-            throw new UnauthorizedException("Error: Bad Request");
+            throw new UnauthorizedException("Error: bad request");
         }
 
         AuthData authData = dataAccess.getAuth(request.authToken());
