@@ -5,7 +5,7 @@ import dataaccess.MemoryDataAccess;
 import dataaccess.exception.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import service.RequestAndResult.*;
+import service.requestandresult.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 

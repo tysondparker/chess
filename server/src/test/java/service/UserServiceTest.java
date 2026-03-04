@@ -3,7 +3,7 @@ package service;
 import dataaccess.MemoryDataAccess;
 import dataaccess.exception.*;
 import org.junit.jupiter.api.*;
-import service.RequestAndResult.*;
+import service.requestandresult.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 

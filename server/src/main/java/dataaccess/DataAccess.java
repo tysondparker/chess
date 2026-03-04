@@ -2,10 +2,8 @@ package dataaccess;
 
 import dataaccess.exception.DataAccessException;
 import model.*;
-import service.RequestAndResult.ListGamesRequest;
 
 import java.util.List;
-import java.util.Map;
 
 public interface DataAccess {
     UserData getUser(String username) throws DataAccessException;

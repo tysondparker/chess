@@ -1,14 +1,9 @@
-package chess.calculators;
-
-import chess.ChessBoard;
-import chess.ChessMove;
-import chess.ChessPiece;
-import chess.ChessPosition;
+package chess;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class B_movescalc implements moves_calc{
+public class BishopMovesCalc implements MovesCalc {
 
     @Override
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {

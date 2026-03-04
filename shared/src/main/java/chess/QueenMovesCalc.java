@@ -1,22 +1,17 @@
-package chess.calculators;
-
-import chess.ChessBoard;
-import chess.ChessMove;
-import chess.ChessPiece;
-import chess.ChessPosition;
+package chess;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class Q_movescalc implements moves_calc{
+public class QueenMovesCalc implements MovesCalc {
 
     @Override
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
 
 //        set everything up
         ChessPiece mypiece = board.getPiece(myPosition);
-        Collection<ChessMove> B_moves = new B_movescalc().pieceMoves(board,myPosition);
-        Collection<ChessMove> R_moves = new R_movescalc().pieceMoves(board,myPosition);
+        Collection<ChessMove> B_moves = new BishopMovesCalc().pieceMoves(board,myPosition);
+        Collection<ChessMove> R_moves = new RookMovesCalc().pieceMoves(board,myPosition);
         Collection<ChessMove> list_of_moves = new ArrayList<>();
 
         list_of_moves.addAll(B_moves);

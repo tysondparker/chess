@@ -3,7 +3,7 @@ package service;
 import dataaccess.*;
 import dataaccess.exception.*;
 import model.*;
-import service.RequestAndResult.*;
+import service.requestandresult.*;
 
 import static java.util.UUID.randomUUID;
 

@@ -4,8 +4,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
-import chess.calculators.*;
-
 /**
  * Represents a single chess piece
  * <p>
@@ -109,22 +107,22 @@ public class ChessPiece {
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         if (this.getPieceType() == PieceType.BISHOP) {
-            return new B_movescalc().pieceMoves(board,myPosition);
+            return new BishopMovesCalc().pieceMoves(board,myPosition);
         }
         else if (this.getPieceType() == PieceType.ROOK) {
-            return new R_movescalc().pieceMoves(board,myPosition);
+            return new RookMovesCalc().pieceMoves(board,myPosition);
         }
         else if (this.getPieceType() == PieceType.KNIGHT) {
-            return new N_movescalc().pieceMoves(board,myPosition);
+            return new KnightMovesCalc().pieceMoves(board,myPosition);
         }
         else if (this.getPieceType() == PieceType.QUEEN) {
-            return new Q_movescalc().pieceMoves(board,myPosition);
+            return new QueenMovesCalc().pieceMoves(board,myPosition);
         }
         else if (this.getPieceType() == PieceType.KING) {
-            return new K_movescalc().pieceMoves(board,myPosition);
+            return new KingMovesCalc().pieceMoves(board,myPosition);
         }
         else if (this.getPieceType() == PieceType.PAWN) {
-            return new P_movescalc().pieceMoves(board,myPosition);
+            return new PawnMovesCalc().pieceMoves(board,myPosition);
         }
         else {
             return List.of();

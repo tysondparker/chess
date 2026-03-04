@@ -2,7 +2,6 @@ package dataaccess;
 
 import dataaccess.exception.DataAccessException;
 import model.*;
-import service.RequestAndResult.ListGamesRequest;
 
 import java.util.*;
 
@@ -14,27 +13,27 @@ public class MemoryDataAccess implements DataAccess {
 
 
     @Override
-    public UserData getUser(String username) throws DataAccessException {
+    public UserData getUser(String username){
         return users.get(username);
     }
 
     @Override
-    public void createUser(UserData data) throws DataAccessException {
+    public void createUser(UserData data) {
         users.put(data.username(),data);
     }
 
     @Override
-    public void createAuth(AuthData authData) throws DataAccessException {
+    public void createAuth(AuthData authData) {
         authTokens.put(authData.authToken(), authData);
     }
 
     @Override
-    public AuthData getAuth(String AuthToken) throws DataAccessException {
+    public AuthData getAuth(String AuthToken)  {
         return authTokens.get(AuthToken);
     }
 
     @Override
-    public void clear() throws DataAccessException {
+    public void clear() {
         users.clear();
         authTokens.clear();
         games.clear();
@@ -42,12 +41,12 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
-    public void deleteAuth(String authData) throws DataAccessException {
+    public void deleteAuth(String authData) {
         authTokens.remove(authData);
     }
 
     @Override
-    public int createGame(GameData data) throws DataAccessException {
+    public int createGame(GameData data) {
         gameId += 1;
 
         GameData newGame = new GameData(gameId,null,null, data.gameName());
@@ -58,24 +57,18 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
-    public GameData getGame(int gameId) throws DataAccessException {
+    public GameData getGame(int gameId) {
         return games.get(gameId);
     }
 
     @Override
-    public void updateGame(GameData game) throws DataAccessException {
+    public void updateGame(GameData game) {
         games.remove(game.gameID());
         games.put(game.gameID(),game);
     }
 
     @Override
-    public List<GameData> listGame() throws DataAccessException {
+    public List<GameData> listGame() {
         return new ArrayList<>(games.values());
-//        List<GameData> gameList = new ArrayList<>();
-//        for (int i = 0; i < games.size(); i++) {
-//            GameData data = games.get(i+1);
-//            gameList.add(data);
-//        }
-//        return gameList;
     }
 }

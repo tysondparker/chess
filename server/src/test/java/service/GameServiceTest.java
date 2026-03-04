@@ -6,7 +6,7 @@ import dataaccess.exception.*;
 import model.GameData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import service.RequestAndResult.*;
+import service.requestandresult.*;
 
 import java.util.List;
 

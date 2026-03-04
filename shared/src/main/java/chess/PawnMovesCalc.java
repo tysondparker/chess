@@ -1,11 +1,9 @@
-package chess.calculators;
-
-import chess.*;
+package chess;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class P_movescalc implements moves_calc {
+public class PawnMovesCalc implements MovesCalc {
 
     @Override
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
