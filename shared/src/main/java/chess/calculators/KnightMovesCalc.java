@@ -1,15 +1,17 @@
-package chess;
+package chess.calculators;
+
+import chess.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class KingMovesCalc implements MovesCalc {
+public class KnightMovesCalc implements MovesCalc {
 
     @Override
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
 
 //        set everything up
-        int [][] direct = {{1,0},{0,1},{-1,0},{0,-1},{1,1},{1,-1},{-1,-1},{-1,1}};
+        int [][] direct = {{1,2},{2,1},{-1,2},{-2,1},{-1,-2},{-2,-1},{1,-2},{2,-1}};
         ChessPiece mypiece = board.getPiece(myPosition);
         Collection<ChessMove> listOfMoves = new ArrayList<>();
 
@@ -26,6 +28,7 @@ public class KingMovesCalc implements MovesCalc {
 //                no piece there
                 ChessPiece newTile = board.getPiece(new ChessPosition(row,col));
                 if(newTile == null) {
+
                     ChessPosition newPosition = new ChessPosition(row, col);
                     listOfMoves.add(new ChessMove(myPosition,newPosition, null));
                 }

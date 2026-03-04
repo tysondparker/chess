@@ -1,6 +1,7 @@
-package chess;
+package chess.calculators;
 
-import java.util.ArrayList;
+import chess.*;
+
 import java.util.Collection;
 
 public class BishopMovesCalc implements MovesCalc {
