@@ -24,15 +24,15 @@ public class KingMovesCalc implements MovesCalc {
                 row += direct[i][0];
                 col += direct[i][1];
 //                no piece there
-                ChessPiece new_tile = board.getPiece(new ChessPosition(row,col));
-                if(new_tile == null) {
-                    ChessPosition new_position = new ChessPosition(row, col);
-                    list_of_moves.add(new ChessMove(myPosition,new_position, null));
+                ChessPiece newTile = board.getPiece(new ChessPosition(row,col));
+                if(newTile == null) {
+                    ChessPosition newPosition = new ChessPosition(row, col);
+                    list_of_moves.add(new ChessMove(myPosition,newPosition, null));
                 }
 //                enemy piece there
-                else if(new_tile.getTeamColor() != mypiece.getTeamColor()) {
-                    ChessPosition new_position = new ChessPosition(row, col);
-                    list_of_moves.add(new ChessMove(myPosition,new_position, null));
+                else if(newTile.getTeamColor() != mypiece.getTeamColor()) {
+                    ChessPosition newPosition = new ChessPosition(row, col);
+                    list_of_moves.add(new ChessMove(myPosition,newPosition, null));
                 }
             }
         }

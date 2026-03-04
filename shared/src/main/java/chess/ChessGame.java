@@ -118,9 +118,9 @@ public class ChessGame {
 
         for (int i = 1; i < 9; i++) {
             for (int j = 1; j < 9; j++) {
-                ChessPosition cur_pos = new ChessPosition(i,j);
-                if (currentBoard.getPiece(cur_pos) != null  && currentBoard.getPiece(cur_pos).getTeamColor() == piece_color){
-                    listOfPieces.add(cur_pos);
+                ChessPosition curPos = new ChessPosition(i,j);
+                if (currentBoard.getPiece(curPos) != null  && currentBoard.getPiece(curPos).getTeamColor() == piece_color){
+                    listOfPieces.add(curPos);
                 }
             }
         }
@@ -145,7 +145,7 @@ public class ChessGame {
      */
     public boolean isInCheck(TeamColor teamColor) {
         Collection<ChessPosition> allPieces = findPieces(teamColor);
-        ChessPosition king_position = findPiece(allPieces, ChessPiece.PieceType.KING);
+        ChessPosition kingPosition = findPiece(allPieces, ChessPiece.PieceType.KING);
         for (int i = 1; i <= 8; i++) {
             for (int j = 1; j <= 8; j++) {
                 ChessPosition curPos = new ChessPosition(i,j);
@@ -153,7 +153,7 @@ public class ChessGame {
                 if (curPiece != null && curPiece.getTeamColor() !=  teamColor){
                     Collection<ChessMove> allCurPieceMoves = curPiece.pieceMoves(currentBoard,curPos);
                     for (ChessMove move : allCurPieceMoves) {
-                        if (move.getEndPosition().equals(king_position)) {
+                        if (move.getEndPosition().equals(kingPosition)) {
                             return true;
                         }
                     }

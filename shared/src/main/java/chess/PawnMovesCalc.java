@@ -49,18 +49,18 @@ public class PawnMovesCalc implements MovesCalc {
             } else {
                 if (board.getPiece(new ChessPosition(row+1, col)) == null) {
                     board.getPiece(new ChessPosition(row + 1, col));
-                    ChessPosition new_position = new ChessPosition(row+1, col);
-                    listOfMoves.add(new ChessMove(myPosition, new_position, ChessPiece.PieceType.BISHOP));
-                    listOfMoves.add(new ChessMove(myPosition, new_position, ChessPiece.PieceType.KNIGHT));
-                    listOfMoves.add(new ChessMove(myPosition, new_position, ChessPiece.PieceType.QUEEN));
-                    listOfMoves.add(new ChessMove(myPosition, new_position, ChessPiece.PieceType.ROOK));
+                    ChessPosition newPosition = new ChessPosition(row+1, col);
+                    listOfMoves.add(new ChessMove(myPosition, newPosition, ChessPiece.PieceType.BISHOP));
+                    listOfMoves.add(new ChessMove(myPosition, newPosition, ChessPiece.PieceType.KNIGHT));
+                    listOfMoves.add(new ChessMove(myPosition, newPosition, ChessPiece.PieceType.QUEEN));
+                    listOfMoves.add(new ChessMove(myPosition, newPosition, ChessPiece.PieceType.ROOK));
                 }
 //                enemy to the side
                 for (int j = 0; j < 2; j++) {
                     if (col + direct[j] >= 1 && col + direct[j] <= 8) {
-                        ChessPiece new_tile = board.getPiece(new ChessPosition(row + 1, col + direct[j]));
-                        if (new_tile != null) {
-                            if (new_tile.getTeamColor() != chessPiece.getTeamColor()) {
+                        ChessPiece newTile = board.getPiece(new ChessPosition(row + 1, col + direct[j]));
+                        if (newTile != null) {
+                            if (newTile.getTeamColor() != chessPiece.getTeamColor()) {
                                 ChessPosition newPosition = new ChessPosition(row +1 , col + direct[j]);
                                 listOfMoves.add(new ChessMove(myPosition, newPosition, ChessPiece.PieceType.BISHOP));
                                 listOfMoves.add(new ChessMove(myPosition, newPosition, ChessPiece.PieceType.KNIGHT));
@@ -91,9 +91,9 @@ public class PawnMovesCalc implements MovesCalc {
 //                enemy to the side
                 for (int j = 0; j < 2; j++) {
                     if (col + direct[j] >= 1 && col + direct[j] <= 8) {
-                        ChessPiece new_tile = board.getPiece(new ChessPosition(row - 1, col + direct[j]));
-                        if (new_tile != null) {
-                            if (new_tile.getTeamColor() != chessPiece.getTeamColor()) {
+                        ChessPiece newTile = board.getPiece(new ChessPosition(row - 1, col + direct[j]));
+                        if (newTile != null) {
+                            if (newTile.getTeamColor() != chessPiece.getTeamColor()) {
                                 ChessPosition newPosition = new ChessPosition(row - 1 , col + direct[j]);
                                 listOfMoves.add(new ChessMove(myPosition, newPosition, null));
                             }
@@ -113,9 +113,9 @@ public class PawnMovesCalc implements MovesCalc {
 //                enemy to the side
                 for (int j = 0; j < 2; j++) {
                     if (col + direct[j] >= 1 && col + direct[j] <= 8) {
-                        ChessPiece new_tile = board.getPiece(new ChessPosition(row - 1, col + direct[j]));
-                        if (new_tile != null) {
-                            if (new_tile.getTeamColor() != chessPiece.getTeamColor()) {
+                        ChessPiece newTile = board.getPiece(new ChessPosition(row - 1, col + direct[j]));
+                        if (newTile != null) {
+                            if (newTile.getTeamColor() != chessPiece.getTeamColor()) {
                                 ChessPosition newPosition = new ChessPosition(row - 1 , col + direct[j]);
                                 listOfMoves.add(new ChessMove(myPosition, newPosition, ChessPiece.PieceType.BISHOP));
                                 listOfMoves.add(new ChessMove(myPosition, newPosition, ChessPiece.PieceType.KNIGHT));

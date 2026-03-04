@@ -10,13 +10,13 @@ public class QueenMovesCalc implements MovesCalc {
 
 //        set everything up
         board.getPiece(myPosition);
-        Collection<ChessMove> B_moves = new BishopMovesCalc().pieceMoves(board,myPosition);
-        Collection<ChessMove> R_moves = new RookMovesCalc().pieceMoves(board,myPosition);
-        Collection<ChessMove> list_of_moves = new ArrayList<>();
+        Collection<ChessMove> bishopMoves = new BishopMovesCalc().pieceMoves(board,myPosition);
+        Collection<ChessMove> rookMoves = new RookMovesCalc().pieceMoves(board,myPosition);
+        Collection<ChessMove> listOfMoves = new ArrayList<>();
 
-        list_of_moves.addAll(B_moves);
-        list_of_moves.addAll(R_moves);
+        listOfMoves.addAll(bishopMoves);
+        listOfMoves.addAll(rookMoves);
 
-        return list_of_moves;
+        return listOfMoves;
     }
 }

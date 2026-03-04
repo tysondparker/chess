@@ -23,12 +23,12 @@ public class UserService {
             throw new AlreadyTakenException("Error: already taken");
         }
 
-        UserData NewUserData = new UserData(request.username(), request.password(), request.email());
-        dataAccess.createUser(NewUserData);
+        UserData newUserData = new UserData(request.username(), request.password(), request.email());
+        dataAccess.createUser(newUserData);
 
         String authToken = randomUUID().toString();
-        AuthData NewAuthData = new AuthData(authToken,request.username());
-        dataAccess.createAuth(NewAuthData);
+        AuthData newAuthData = new AuthData(authToken,request.username());
+        dataAccess.createAuth(newAuthData);
 
         return new RegisterResult(request.username(),authToken);
     }
@@ -45,8 +45,8 @@ public class UserService {
         UserData user = dataAccess.getUser(request.username());
 
         String authToken = randomUUID().toString();
-        AuthData NewAuthData = new AuthData(authToken,user.username());
-        dataAccess.createAuth(NewAuthData);
+        AuthData newAuthData = new AuthData(authToken,user.username());
+        dataAccess.createAuth(newAuthData);
 
         return new LoginResult(request.username(),authToken);
     }

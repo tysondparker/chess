@@ -39,11 +39,11 @@ public class GameService {
         if (game == null) {
             throw new BadRequestException("Error: bad request");
         }
-        String Color = request.playerColor();
-       if (Color == null || Color.isBlank()) {
+        String color = request.playerColor();
+       if (color == null || color.isBlank()) {
             throw new BadRequestException("Error: bad request");
         }
-        if(!Color.equals("WHITE") && !Color.equals("BLACK")) {
+        if(!color.equals("WHITE") && !color.equals("BLACK")) {
             throw new BadRequestException("Error: bad request");
         }
 

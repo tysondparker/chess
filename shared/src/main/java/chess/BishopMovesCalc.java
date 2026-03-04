@@ -10,8 +10,8 @@ public class BishopMovesCalc implements MovesCalc {
 
 //        set everything up
         int [][] direct = {{1,1},{1,-1},{-1,-1},{-1,1}};
-        ChessPiece mypiece = board.getPiece(myPosition);
-        Collection<ChessMove> list_of_moves = new ArrayList<>();
+        ChessPiece chessPiece = board.getPiece(myPosition);
+        Collection<ChessMove> listOfMoves = new ArrayList<>();
 
 
 //        For Loop
@@ -26,24 +26,24 @@ public class BishopMovesCalc implements MovesCalc {
                 col += direct[i][1];
 
 //                no piece there
-                ChessPiece new_tile = board.getPiece(new ChessPosition(row,col));
-                if(new_tile == null) {
-                    ChessPosition new_position = new ChessPosition(row, col);
-                    list_of_moves.add(new ChessMove(myPosition,new_position, null));
+                ChessPiece newTile = board.getPiece(new ChessPosition(row,col));
+                if(newTile == null) {
+                    ChessPosition newPosition = new ChessPosition(row, col);
+                    listOfMoves.add(new ChessMove(myPosition,newPosition, null));
                 }
 //                enemy piece there
-                else if(new_tile.getTeamColor() != mypiece.getTeamColor()) {
-                    ChessPosition new_position = new ChessPosition(row, col);
-                    list_of_moves.add(new ChessMove(myPosition,new_position, null));
+                else if(newTile.getTeamColor() != chessPiece.getTeamColor()) {
+                    ChessPosition newPosition = new ChessPosition(row, col);
+                    listOfMoves.add(new ChessMove(myPosition,newPosition, null));
                     break;
                 }
 //                our piece there
-                else if(new_tile.getTeamColor() == mypiece.getTeamColor()) {
+                else if(newTile.getTeamColor() == chessPiece.getTeamColor()) {
                     break;
                 }
 
             }
         }
-        return list_of_moves;
+        return listOfMoves;
     }
 }

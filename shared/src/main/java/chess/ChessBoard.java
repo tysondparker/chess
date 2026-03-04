@@ -16,19 +16,19 @@ public class ChessBoard {
     public ChessBoard() {
     }
     public ChessBoard deepCopy() {
-        ChessBoard copy_board = new ChessBoard();
+        ChessBoard chessBoard = new ChessBoard();
 
         for (int i = 1; i <= 8; i++) {
             for (int j = 1; j <= 8 ; j++) {
                 ChessPiece piece = this.getPiece(new ChessPosition(i,j));
                 if (piece != null) {
-                    ChessPiece copy_piece = new ChessPiece(piece.getTeamColor(),piece.getPieceType());
-                    copy_board.addPiece(new ChessPosition(i,j),copy_piece);
+                    ChessPiece copyPiece = new ChessPiece(piece.getTeamColor(),piece.getPieceType());
+                    chessBoard.addPiece(new ChessPosition(i,j),copyPiece);
                 }
             }
 
         }
-        return copy_board;
+        return chessBoard;
     }
     /**
      * Adds a chess piece to the chessboard
@@ -108,20 +108,20 @@ public class ChessBoard {
 
     @Override
     public String toString() {
-        String final_string = "";
+        String finalString = "";
         for (int i = 1; i <= 8; i++) {
             if(i!=1) {
-                final_string+="\n";
+                finalString+="\n";
             }
             for (int j = 1; j <= 8; j++) {
                 ChessPiece piece = this.getPiece(new ChessPosition(i,j));
                 if (piece == null) {
-                    final_string += "[ ]";
+                    finalString += "[ ]";
                 } else {
-                    final_string += String.format("%s", piece);
+                    finalString += String.format("%s", piece);
                 }
             }
         }
-        return final_string;
+        return finalString;
     }
 }

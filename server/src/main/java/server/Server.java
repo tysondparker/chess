@@ -52,9 +52,9 @@ public class Server {
         javalin.post("/user", this::register);
         javalin.post("/session", this::login);
 
-        javalin.post("/game", this::CreateGame);
-        javalin.put("/game", this::JoinGame);
-        javalin.get("/game",this::ListGame);
+        javalin.post("/game", this::createGame);
+        javalin.put("/game", this::joinGame);
+        javalin.get("/game",this::listGame);
 
         javalin.delete("/db", this::clear);
         javalin.delete("/session", this::logout);
@@ -82,8 +82,8 @@ public class Server {
     }
 
     private void logout(Context ctx) throws Exception {
-        String AuthToken = ctx.header("Authorization");
-        LogoutRequest request = new LogoutRequest(AuthToken);
+        String authToken = ctx.header("Authorization");
+        LogoutRequest request = new LogoutRequest(authToken);
         service.logout(request);
         ctx.status(200);
         ctx.result("{}");
@@ -95,25 +95,25 @@ public class Server {
         ctx.result("{}");
     }
 
-    private void CreateGame(Context ctx) throws Exception {
-        String AuthToken = ctx.header("Authorization");
+    private void createGame(Context ctx) throws Exception {
+        String authToken = ctx.header("Authorization");
         CreateGameRequest request = new Gson().fromJson(ctx.body(),CreateGameRequest.class);
-        CreateGameResult result = gameService.createGame(request,AuthToken);
+        CreateGameResult result = gameService.createGame(request,authToken);
         ctx.status(200);
         ctx.result(new Gson().toJson(result));
     }
 
-    private void JoinGame(Context ctx) throws Exception {
-        String AuthToken = ctx.header("Authorization");
+    private void joinGame(Context ctx) throws Exception {
+        String authToken = ctx.header("Authorization");
         JoinGameRequest request = new Gson().fromJson(ctx.body(),JoinGameRequest.class);
-        gameService.joinGame(request,AuthToken);
+        gameService.joinGame(request,authToken);
         ctx.status(200);
         ctx.result("{}");
     }
 
-    private void ListGame(Context ctx) throws Exception {
-        String AuthToken = ctx.header("Authorization");
-        ListGamesRequest request = new ListGamesRequest(AuthToken);
+    private void listGame(Context ctx) throws Exception {
+        String authToken = ctx.header("Authorization");
+        ListGamesRequest request = new ListGamesRequest(authToken);
         List<GameData> games = gameService.listGames(request);
         ctx.result(new Gson().toJson(Map.of("games",games)));
         ctx.status(200);

@@ -11,7 +11,7 @@ public class KnightMovesCalc implements MovesCalc {
 //        set everything up
         int [][] direct = {{1,2},{2,1},{-1,2},{-2,1},{-1,-2},{-2,-1},{1,-2},{2,-1}};
         ChessPiece mypiece = board.getPiece(myPosition);
-        Collection<ChessMove> list_of_moves = new ArrayList<>();
+        Collection<ChessMove> listOfMoves = new ArrayList<>();
 
 
 //        For Loop
@@ -24,18 +24,19 @@ public class KnightMovesCalc implements MovesCalc {
                 row += direct[i][0];
                 col += direct[i][1];
 //                no piece there
-                ChessPiece new_tile = board.getPiece(new ChessPosition(row,col));
-                if(new_tile == null) {
-                    ChessPosition new_position = new ChessPosition(row, col);
-                    list_of_moves.add(new ChessMove(myPosition,new_position, null));
+                ChessPiece newTile = board.getPiece(new ChessPosition(row,col));
+                if(newTile == null) {
+
+                    ChessPosition newPosition = new ChessPosition(row, col);
+                    listOfMoves.add(new ChessMove(myPosition,newPosition, null));
                 }
 //                enemy piece there
-                else if(new_tile.getTeamColor() != mypiece.getTeamColor()) {
-                    ChessPosition new_position = new ChessPosition(row, col);
-                    list_of_moves.add(new ChessMove(myPosition,new_position, null));
+                else if(newTile.getTeamColor() != mypiece.getTeamColor()) {
+                    ChessPosition newPosition = new ChessPosition(row, col);
+                    listOfMoves.add(new ChessMove(myPosition,newPosition, null));
                 }
             }
         }
-        return list_of_moves;
+        return listOfMoves;
     }
 }
