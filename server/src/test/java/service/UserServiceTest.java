@@ -25,7 +25,7 @@ class UserServiceTest {
     }
 
     @Test
-    void registerNegative() throws Exception {
+    void registerNegative() {
         RegisterRequest request = new RegisterRequest("",null,"donutluver@gmail.com");
         assertThrows(BadRequestException.class, () -> service.register(request));
     }
@@ -53,8 +53,6 @@ class UserServiceTest {
 
     @Test
     void logoutPositive() throws Exception {
-        RegisterRequest registerRequest = new RegisterRequest("DonutLarry","Donuts4life","donutluver@gmail.com");
-        RegisterResult rr = service.register(registerRequest);
 
         LoginRequest request = new LoginRequest("DonutLarry","Donuts4life");
         LoginResult result = service.login(request);
@@ -68,7 +66,7 @@ class UserServiceTest {
     }
 
     @Test
-    void logoutInvalidToken() throws Exception {
+    void logoutNegative() throws Exception {
 
         RegisterRequest registerRequest = new RegisterRequest("DonutLarry", "Donuts4life", "donutluver@gmail.com");
         service.register(registerRequest);
