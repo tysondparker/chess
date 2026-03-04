@@ -27,8 +27,8 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
-    public AuthData getAuth(String AuthToken)  {
-        return authTokens.get(AuthToken);
+    public AuthData getAuth(String authToken)  {
+        return authTokens.get(authToken);
     }
 
     @Override

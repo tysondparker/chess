@@ -11,7 +11,7 @@ public class KingMovesCalc implements MovesCalc {
 //        set everything up
         int [][] direct = {{1,0},{0,1},{-1,0},{0,-1},{1,1},{1,-1},{-1,-1},{-1,1}};
         ChessPiece mypiece = board.getPiece(myPosition);
-        Collection<ChessMove> list_of_moves = new ArrayList<>();
+        Collection<ChessMove> listOfMoves = new ArrayList<>();
 
 
 //        For Loop
@@ -27,15 +27,15 @@ public class KingMovesCalc implements MovesCalc {
                 ChessPiece newTile = board.getPiece(new ChessPosition(row,col));
                 if(newTile == null) {
                     ChessPosition newPosition = new ChessPosition(row, col);
-                    list_of_moves.add(new ChessMove(myPosition,newPosition, null));
+                    listOfMoves.add(new ChessMove(myPosition,newPosition, null));
                 }
 //                enemy piece there
                 else if(newTile.getTeamColor() != mypiece.getTeamColor()) {
                     ChessPosition newPosition = new ChessPosition(row, col);
-                    list_of_moves.add(new ChessMove(myPosition,newPosition, null));
+                    listOfMoves.add(new ChessMove(myPosition,newPosition, null));
                 }
             }
         }
-        return list_of_moves;
+        return listOfMoves;
     }
 }

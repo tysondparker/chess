@@ -113,13 +113,13 @@ public class ChessGame {
     }
 
 //    Finds the king
-    public Collection<ChessPosition> findPieces(TeamColor piece_color) {
+    public Collection<ChessPosition> findPieces(TeamColor pieceColor) {
         Collection<ChessPosition> listOfPieces = new ArrayList<>();
 
         for (int i = 1; i < 9; i++) {
             for (int j = 1; j < 9; j++) {
                 ChessPosition curPos = new ChessPosition(i,j);
-                if (currentBoard.getPiece(curPos) != null  && currentBoard.getPiece(curPos).getTeamColor() == piece_color){
+                if (currentBoard.getPiece(curPos) != null  && currentBoard.getPiece(curPos).getTeamColor() == pieceColor){
                     listOfPieces.add(curPos);
                 }
             }
@@ -165,10 +165,10 @@ public class ChessGame {
     }
 
     //    return true if the piece can't make any moves
-    public boolean searchPieceMoves(Collection<ChessMove> pieceMoves, ChessPiece piece, ChessPosition piece_position) {
+    public boolean searchPieceMoves(Collection<ChessMove> pieceMoves, ChessPiece piece, ChessPosition piecePosition) {
         for (ChessMove move : pieceMoves) {
             ChessBoard testBoard = currentBoard.deepCopy();
-            ChessPiece testPiece = testBoard.getPiece(piece_position);
+            ChessPiece testPiece = testBoard.getPiece(piecePosition);
 
             testBoard.addPiece(move.getEndPosition(),testPiece);
             testBoard.addPiece(move.getStartPosition(),null);
