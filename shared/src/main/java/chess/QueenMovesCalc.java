@@ -9,7 +9,7 @@ public class QueenMovesCalc implements MovesCalc {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
 
 //        set everything up
-        ChessPiece mypiece = board.getPiece(myPosition);
+        board.getPiece(myPosition);
         Collection<ChessMove> B_moves = new BishopMovesCalc().pieceMoves(board,myPosition);
         Collection<ChessMove> R_moves = new RookMovesCalc().pieceMoves(board,myPosition);
         Collection<ChessMove> list_of_moves = new ArrayList<>();

@@ -1,6 +1,5 @@
 package dataaccess;
 
-import dataaccess.exception.DataAccessException;
 import model.*;
 
 import java.util.*;
