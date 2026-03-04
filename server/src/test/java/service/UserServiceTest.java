@@ -53,6 +53,8 @@ class UserServiceTest {
 
     @Test
     void logoutPositive() throws Exception {
+        RegisterRequest registerRequest = new RegisterRequest("DonutLarry", "Donuts4life", "donutluver@gmail.com");
+        service.register(registerRequest);
 
         LoginRequest request = new LoginRequest("DonutLarry","Donuts4life");
         LoginResult result = service.login(request);

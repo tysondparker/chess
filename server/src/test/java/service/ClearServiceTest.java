@@ -15,6 +15,8 @@ public class ClearServiceTest {
     private ClearService clearService;
 
     String setUp() throws DataAccessException {
+        RegisterRequest registerRequest = new RegisterRequest("DonutLarry", "Donuts4life", "donutluver@gmail.com");
+        userService.register(registerRequest);
 
         LoginRequest loginRequest = new LoginRequest("DonutLarry", "Donuts4life");
         LoginResult loginResult = userService.login(loginRequest);

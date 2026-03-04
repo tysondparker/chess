@@ -17,6 +17,8 @@ public class GameServiceTest {
     private UserService userService;
 
     String registerUser() throws DataAccessException {
+        RegisterRequest registerRequest = new RegisterRequest("DonutLarry", "Donuts4life", "donutluver@gmail.com");
+        userService.register(registerRequest);
 
         LoginRequest loginRequest = new LoginRequest("DonutLarry","Donuts4life");
         LoginResult loginResult = userService.login(loginRequest);
