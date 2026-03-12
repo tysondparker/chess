@@ -44,6 +44,44 @@ public class DatabaseManager {
      * }
      * </code>
      */
+
+    public static void createTables() throws DataAccessException {
+        try (var conn = getConnection();
+             var stmt = conn.createStatement()) {
+
+            stmt.executeUpdate("""
+            CREATE TABLE IF NOT EXISTS users (
+                username VARCHAR(255) PRIMARY KEY,
+                password VARCHAR(255) NOT NULL,
+                email VARCHAR(255) NOT NULL
+            );
+        """);
+
+            stmt.executeUpdate("""
+            CREATE TABLE IF NOT EXISTS auth (
+                authToken VARCHAR(255) PRIMARY KEY,
+                username VARCHAR(255) NOT NULL,
+                FOREIGN KEY (username) REFERENCES users(username)
+            );
+        """);
+
+            stmt.executeUpdate("""
+            CREATE TABLE IF NOT EXISTS games (
+                gameID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                whiteUsername VARCHAR(255),
+                blackUsername VARCHAR(255),
+                gameName VARCHAR(255) NOT NULL,
+                gameState TEXT NOT NULL,
+                FOREIGN KEY (whiteUsername) REFERENCES users(username),
+                FOREIGN KEY (blackUsername) REFERENCES users(username)
+            );
+        """);
+
+        } catch (SQLException ex) {
+            throw new SqlDataAccessException("failed to create tables", ex);
+        }
+    }
+
     static Connection getConnection() throws DataAccessException {
         try {
             //do not wrap the following line with a try-with-resources

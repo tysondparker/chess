@@ -6,6 +6,7 @@ import dataaccess.exception.SqlDataAccessException;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -20,7 +21,7 @@ public class MySqlDataAccess implements DataAccess {
     @Override
     public UserData getUser(String username) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT username, password, email FROM user WHERE username = ?";
+            var statement = "SELECT username, password, email FROM users WHERE username = ?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 ps.setString(1, username);
                 try (ResultSet rs = ps.executeQuery()) {
@@ -44,8 +45,9 @@ public class MySqlDataAccess implements DataAccess {
 
     @Override
     public void createUser(UserData data) throws DataAccessException {
-        var statement = "INSERT INTO user (username, password, email) VALUES (?, ?, ?)";
-        executeUpdate(statement, data.username(), data.password(), data.email());
+        var statement = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
+        String hashed = BCrypt.hashpw(data.password(), BCrypt.gensalt());
+        executeUpdate(statement, data.username(), hashed, data.email());
     }
     private int executeUpdate(String statement, Object... params) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection();
@@ -59,6 +61,8 @@ public class MySqlDataAccess implements DataAccess {
                         ps.setInt(i + 1, (Integer) param);
                     } else if (param == null) {
                         ps.setNull(i + 1, NULL);
+                    } else {
+                        ps.setObject(i + 1, param);
                     }
                 }
 
