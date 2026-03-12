@@ -22,7 +22,7 @@ public class Server {
 
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
-        DataAccess dataAccess = new MemoryDataAccess();
+        DataAccess dataAccess = new MySqlDataAccess();
         this.service = new UserService(dataAccess);
         this.gameService = new GameService(dataAccess);
         this.clearService = new ClearService(dataAccess);
@@ -61,6 +61,12 @@ public class Server {
     }
 
     public int run(int desiredPort) {
+        try {
+            DatabaseManager.createDatabase();
+            DatabaseManager.createTables();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         javalin.start(desiredPort);
         return javalin.port();
     }
