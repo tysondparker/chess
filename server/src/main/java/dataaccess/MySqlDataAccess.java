@@ -81,12 +81,26 @@ public class MySqlDataAccess implements DataAccess {
 
     @Override
     public void createAuth(AuthData authData) throws DataAccessException {
-
+        var statement = "INSERT INTO auth (authToken, username) VALUES (?,?)";
+        executeUpdate(statement, authData.authToken(),authData.username());
     }
 
     @Override
-    public AuthData getAuth(String username) throws DataAccessException {
-        return null;
+    public AuthData getAuth(String authToken) throws DataAccessException {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT authToken, username FROM auth WHERE authToken = ?";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setString(1, authToken);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return new AuthData(rs.getString("authToken"),rs.getString("username"));
+                    }
+                }
+            }
+            return null;
+        } catch (SQLException e) {
+            throw new SqlDataAccessException("Unable to get User: ", e);
+        }
     }
 
     @Override
