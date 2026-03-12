@@ -24,7 +24,7 @@ public class GameService {
             throw new BadRequestException("Error: bad request");
         }
 
-        GameData tempGame = new GameData(0,null,null, request.gameName());
+        GameData tempGame = new GameData(0,null,null, request.gameName(), game);
 
         int gameId = dataAccess.createGame(tempGame);
         return new CreateGameResult(gameId);
@@ -50,10 +50,10 @@ public class GameService {
         String plyrColor = request.playerColor();
 
         if (plyrColor.equals("WHITE") && game.whiteUsername() == null) {
-            GameData newGameData = new GameData(game.gameID(),token.username(),game.blackUsername(),game.gameName());
+            GameData newGameData = new GameData(game.gameID(),token.username(),game.blackUsername(),game.gameName(), game);
             dataAccess.updateGame(newGameData);
         } else if (plyrColor.equals("BLACK") && game.blackUsername() == null) {
-            GameData newGameData = new GameData(game.gameID(),game.whiteUsername(),token.username(),game.gameName());
+            GameData newGameData = new GameData(game.gameID(),game.whiteUsername(),token.username(),game.gameName(), game);
             dataAccess.updateGame(newGameData);
         } else {
             throw new AlreadyTakenException("Error: bad request");

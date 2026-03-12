@@ -1,5 +1,6 @@
 package dataaccess;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import dataaccess.exception.DataAccessException;
 import dataaccess.exception.SqlDataAccessException;
@@ -128,7 +129,25 @@ public class MySqlDataAccess implements DataAccess {
 
     @Override
     public GameData getGame(int gameId) throws DataAccessException {
-        return null;
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT * FROM games WHERE gameId = ?";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setInt(1, gameId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        var white = rs.getString("whiteUsername");
+                        var black = rs.getString("blackUsername");
+                        var name = rs.getString("gameName");
+                        var json = rs.getString("gameState");
+                        ChessGame game = new Gson().fromJson(json, chess.ChessGame.class);
+                        return new GameData(gameId, white, black, name, game);
+                    }
+                }
+            }
+            return null;
+        } catch (SQLException e) {
+            throw new SqlDataAccessException("Unable to get User: ", e);
+        }
     }
 
     @Override
