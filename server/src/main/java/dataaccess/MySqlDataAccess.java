@@ -13,6 +13,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
@@ -56,14 +57,11 @@ public class MySqlDataAccess implements DataAccess {
 
                 for (int i = 0; i < params.length; i++) {
                     Object param = params[i];
-                    if (param instanceof String) {
-                        ps.setString(i + 1, (String) param);
-                    } else if (param instanceof Integer) {
-                        ps.setInt(i + 1, (Integer) param);
-                    } else if (param == null) {
-                        ps.setNull(i + 1, NULL);
-                    } else {
-                        ps.setObject(i + 1, param);
+                    switch (param) {
+                        case String s -> ps.setString(i + 1, s);
+                        case Integer integer -> ps.setInt(i + 1, integer);
+                        case null -> ps.setNull(i + 1, NULL);
+                        default -> ps.setObject(i + 1, param);
                     }
                 }
 
@@ -152,11 +150,36 @@ public class MySqlDataAccess implements DataAccess {
 
     @Override
     public void updateGame(GameData gameId) throws DataAccessException {
+        var statement = """
+                UPDATE games
+                SET whiteUsername = ?, blackUsername = ?, gameName = ?, gameState = ?
+                WHERE gameId = ?
+            """;
+        String json = new Gson().toJson(gameId.game());
+
+        executeUpdate(statement,gameId.whiteUsername(),gameId.blackUsername(),gameId.gameName(),json,gameId.gameID());
 
     }
 
     @Override
     public List<GameData> listGame() throws DataAccessException {
-        return List.of();
+        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement ps = conn.prepareStatement("SELECT * FROM games"); ResultSet rs = ps.executeQuery()) {
+            var list = new ArrayList<GameData>();
+            var gson = new Gson();
+
+            while(rs.next()) {
+                int id = rs.getInt("gameId");
+                String whiteUsername = rs.getString("whiteUsername");
+                String blackUsername = rs.getString("blackUsername");
+                String gameName = rs.getString("gameName");
+                String json = rs.getString("game");
+
+                var game = gson.fromJson(json, ChessGame.class);
+                list.add(new GameData(id,whiteUsername,blackUsername,gameName,game));
+            }
+            return list;
+        } catch (SQLException e) {
+            throw new SqlDataAccessException("Unable to get User: ", e);
+        }
     }
 }
