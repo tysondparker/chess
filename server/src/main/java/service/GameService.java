@@ -1,5 +1,6 @@
 package service;
 
+import chess.ChessGame;
 import dataaccess.*;
 import dataaccess.exception.*;
 import model.*;
@@ -24,7 +25,7 @@ public class GameService {
             throw new BadRequestException("Error: bad request");
         }
 
-        GameData tempGame = new GameData(0,null,null, request.gameName(), game);
+        GameData tempGame = new GameData(0,null,null, request.gameName(), new ChessGame());
 
         int gameId = dataAccess.createGame(tempGame);
         return new CreateGameResult(gameId);
@@ -50,10 +51,10 @@ public class GameService {
         String plyrColor = request.playerColor();
 
         if (plyrColor.equals("WHITE") && game.whiteUsername() == null) {
-            GameData newGameData = new GameData(game.gameID(),token.username(),game.blackUsername(),game.gameName(), game);
+            GameData newGameData = new GameData(game.gameID(),token.username(),game.blackUsername(),game.gameName(), game.game());
             dataAccess.updateGame(newGameData);
         } else if (plyrColor.equals("BLACK") && game.blackUsername() == null) {
-            GameData newGameData = new GameData(game.gameID(),game.whiteUsername(),token.username(),game.gameName(), game);
+            GameData newGameData = new GameData(game.gameID(),game.whiteUsername(),token.username(),game.gameName(), game.game());
             dataAccess.updateGame(newGameData);
         } else {
             throw new AlreadyTakenException("Error: bad request");
