@@ -105,17 +105,25 @@ public class MySqlDataAccess implements DataAccess {
 
     @Override
     public void clear() throws DataAccessException {
-
+        executeUpdate("DELETE FROM auth");
+        executeUpdate("DELETE FROM games");
+        executeUpdate("DELETE FROM users");
     }
 
     @Override
     public void deleteAuth(String authData) throws DataAccessException {
-
+        var statement = "DELETE FROM auth WHERE authToken = ?";
+        executeUpdate(statement, authData);
     }
 
     @Override
     public int createGame(GameData data) throws DataAccessException {
-        return 0;
+        var statement = """
+                INSERT INTO games (whiteUsername, blackUsername, gameName, gameState)
+                VALUES (?,?,?,?)
+            """;
+        String json = new Gson().toJson(data);
+        return executeUpdate(data.whiteUsername(),data.blackUsername(),data.gameName(),json);
     }
 
     @Override
