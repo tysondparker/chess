@@ -7,7 +7,6 @@ import dataaccess.exception.SqlDataAccessException;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
-import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -168,7 +167,8 @@ public class MySqlDataAccess implements DataAccess {
 
     @Override
     public List<GameData> listGame() throws DataAccessException {
-        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement ps = conn.prepareStatement("SELECT * FROM games"); ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement ps =
+                conn.prepareStatement("SELECT * FROM games"); ResultSet rs = ps.executeQuery()) {
             var list = new ArrayList<GameData>();
             var gson = new Gson();
 
