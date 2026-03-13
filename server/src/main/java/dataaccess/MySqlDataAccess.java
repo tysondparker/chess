@@ -20,6 +20,12 @@ import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import static java.sql.Types.NULL;
 
 public class MySqlDataAccess implements DataAccess {
+
+    public MySqlDataAccess() throws DataAccessException {
+        DatabaseManager.createDatabase();
+        DatabaseManager.createTables();
+    }
+
     @Override
     public UserData getUser(String username) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
@@ -48,8 +54,7 @@ public class MySqlDataAccess implements DataAccess {
     @Override
     public void createUser(UserData data) throws DataAccessException {
         var statement = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
-        String hashed = BCrypt.hashpw(data.password(), BCrypt.gensalt());
-        executeUpdate(statement, data.username(), hashed, data.email());
+        executeUpdate(statement, data.username(), data.password(), data.email());
     }
     private int executeUpdate(String statement, Object... params) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection();
@@ -110,9 +115,9 @@ public class MySqlDataAccess implements DataAccess {
     }
 
     @Override
-    public void deleteAuth(String authData) throws DataAccessException {
+    public void deleteAuth(String authToken) throws DataAccessException {
         var statement = "DELETE FROM auth WHERE authToken = ?";
-        executeUpdate(statement, authData);
+        executeUpdate(statement, authToken);
     }
 
     @Override
@@ -121,14 +126,14 @@ public class MySqlDataAccess implements DataAccess {
                 INSERT INTO games (whiteUsername, blackUsername, gameName, gameState)
                 VALUES (?,?,?,?)
             """;
-        String json = new Gson().toJson(data);
-        return executeUpdate(data.whiteUsername(),data.blackUsername(),data.gameName(),json);
+        String json = new Gson().toJson(data.game());
+        return executeUpdate(statement,data.whiteUsername(),data.blackUsername(),data.gameName(),json);
     }
 
     @Override
     public GameData getGame(int gameId) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT * FROM games WHERE gameId = ?";
+            var statement = "SELECT * FROM games WHERE gameID = ?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 ps.setInt(1, gameId);
                 try (ResultSet rs = ps.executeQuery()) {
@@ -144,7 +149,7 @@ public class MySqlDataAccess implements DataAccess {
             }
             return null;
         } catch (SQLException e) {
-            throw new SqlDataAccessException("Unable to get User: ", e);
+            throw new SqlDataAccessException("Error : Unable to get Game: ", e);
         }
     }
 
@@ -153,7 +158,7 @@ public class MySqlDataAccess implements DataAccess {
         var statement = """
                 UPDATE games
                 SET whiteUsername = ?, blackUsername = ?, gameName = ?, gameState = ?
-                WHERE gameId = ?
+                WHERE gameID = ?
             """;
         String json = new Gson().toJson(gameId.game());
 
@@ -168,18 +173,18 @@ public class MySqlDataAccess implements DataAccess {
             var gson = new Gson();
 
             while(rs.next()) {
-                int id = rs.getInt("gameId");
+                int id = rs.getInt("gameID");
                 String whiteUsername = rs.getString("whiteUsername");
                 String blackUsername = rs.getString("blackUsername");
                 String gameName = rs.getString("gameName");
-                String json = rs.getString("game");
+                String json = rs.getString("gameState");
 
                 var game = gson.fromJson(json, ChessGame.class);
                 list.add(new GameData(id,whiteUsername,blackUsername,gameName,game));
             }
             return list;
         } catch (SQLException e) {
-            throw new SqlDataAccessException("Unable to get User: ", e);
+            throw new SqlDataAccessException("Error : Unable to list games ", e);
         }
     }
 }

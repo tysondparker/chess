@@ -28,7 +28,7 @@ public class DatabaseManager {
              var preparedStatement = conn.prepareStatement(statement)) {
             preparedStatement.executeUpdate();
         } catch (SQLException ex) {
-            throw new SqlDataAccessException("failed to create database", ex);
+            throw new SqlDataAccessException("Error: failed to create database", ex);
         }
     }
 
@@ -89,7 +89,7 @@ public class DatabaseManager {
             conn.setCatalog(databaseName);
             return conn;
         } catch (SQLException ex) {
-            throw new SqlDataAccessException("failed to get connection", ex);
+            throw new SqlDataAccessException("Error: failed to establish connection", ex);
         }
     }
 
@@ -102,7 +102,7 @@ public class DatabaseManager {
             props.load(propStream);
             loadProperties(props);
         } catch (Exception ex) {
-            throw new RuntimeException("unable to process db.properties", ex);
+            throw new RuntimeException("Error: unable to process db.properties", ex);
         }
     }
 

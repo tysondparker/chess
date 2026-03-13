@@ -22,10 +22,23 @@ public class Server {
 
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
-        DataAccess dataAccess = new MySqlDataAccess();
+        DataAccess dataAccess;
+        try {
+            dataAccess = new MySqlDataAccess();
+        } catch (DataAccessException e) {
+            throw new RuntimeException("Failed to initialize database", e);
+        }
+
         this.service = new UserService(dataAccess);
         this.gameService = new GameService(dataAccess);
         this.clearService = new ClearService(dataAccess);
+
+//        SqlError 500
+        javalin.exception(SqlDataAccessException.class,(ex, ctx)-> {
+            var body = new Gson().toJson(Map.of("message",String.format(ex.getMessage())));
+            ctx.status(500);
+            ctx.json(body);
+        });
 
 //        Already taken 403
         javalin.exception(AlreadyTakenException.class,(ex, ctx)-> {
@@ -61,12 +74,6 @@ public class Server {
     }
 
     public int run(int desiredPort) {
-        try {
-            DatabaseManager.createDatabase();
-            DatabaseManager.createTables();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         javalin.start(desiredPort);
         return javalin.port();
     }
