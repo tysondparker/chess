@@ -37,14 +37,18 @@ public class ServerFacade {
         LogoutRequest logRequest = new LogoutRequest(authToken);
         var request = buildRequest("DELETE", "/session", logRequest);
         var response = sendRequest(request);
-        handleResponse(response, LoginRequest.class);
+    }
+
+    public void clear() throws ClientException {
+        var request = buildRequest("DELETE", "/db",null);
+        var response = sendRequest(request);
     }
 
     private HttpResponse<String> sendRequest(HttpRequest request) throws ClientException {
         try {
             return client.send(request,HttpResponse.BodyHandlers.ofString());
         } catch (Exception ex) {
-            throw new ClientException();
+            throw new ClientException("Bad Request");
         }
     }
 
@@ -69,9 +73,9 @@ public class ServerFacade {
         if (!isSuccessful(status)) {
             var body = response.body();
             if (body != null) {
-                throw new ClientException();
+                throw new ClientException("Bad input, try again");
             }
-            throw new ClientException();
+            throw new ClientException("Bad input, try again");
         }
 
         if (responseClass != null) {
@@ -84,5 +88,4 @@ public class ServerFacade {
     private boolean isSuccessful(int status) {
         return status / 100 == 2;
     }
-
 }

@@ -41,7 +41,7 @@ public class ChessClient {
     }
 
     public String login(String... params) throws ClientException {
-        if (params.length >= 2) {
+        if (params.length == 2) {
             String username = params[0];
             String password = params[1];
             LoginRequest request = new LoginRequest(username,password);
@@ -50,32 +50,54 @@ public class ChessClient {
             state = State.SIGNEDIN;
             return String.format("You signed in as %s.", username);
         }
-        throw new ClientException();
+        throw new ClientException("Remember Login <username> <password>");
     }
+
     public String logout(String... params) throws ClientException {
-        assertSignedIn();
-        state = State.SIGNEDOUT;
-        server.logout(authToken);
-        return String.format("%s logged out", userName);
+        if(state.equals(State.SIGNEDIN)){
+            state = State.SIGNEDOUT;
+            server.logout(authToken);
+            return String.format("%s logged out", userName);
+        } else {
+            return "Not logged in";
+        }
     }
 
     public String register(String... params) throws ClientException {
-        if (params.length >= 3) {
+        if (params.length == 3) {
             String username = params[0];
             String password = params[1];
             String email = params[2];
+
             UserData newUser = new UserData(username,password,email);
             RegisterResult result = server.register(newUser);
+
             userName = result.username();
             authToken = result.authToken();
             state = State.SIGNEDIN;
-            return String.format("You signed in as %s.", username);
+
+            return String.format("You're successfully signed in as %s.", username);
         }
-        throw new ClientException();
+        throw new ClientException("To Register Enter: register <username> <password> <email>");
+    }
+
+    public String clear() throws ClientException {
+        if(assertSignedIn()){
+            Scanner scanner2 = new Scanner(System.in);
+            System.out.print("\n" + "Password: ");
+            String line = scanner2.nextLine();
+            if(line.equals("tp123")){
+                server.clear();
+                return "Database Cleared";
+            } else {
+                return "Wrong Password";
+            }
+        }
+        return "Not Signed in";
     }
 
     public String help() {
-        if (state == State.SIGNEDOUT) {
+        if (!assertSignedIn()) {
             return """
                     
                     - help (Actions you can take)
@@ -95,19 +117,27 @@ public class ChessClient {
                 - quit
                 """;
     }
+
     private void printPrompt() {
         System.out.print("\n" + ">>> ");
     }
 
     public String eval(String input) {
         try {
-            String[] tokens = input.toLowerCase().split(" ");
-            String cmd = (tokens.length > 0) ? tokens[0] : "help";
+            String[] tokens = input.split(" ");
+            String cmd = "";
+            if(tokens.length > 0) {
+                cmd = tokens[0].toLowerCase();
+            } else {
+                cmd = "help";
+            }
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
                 case "register" -> register(params);
                 case "login" -> login(params);
                 case "logout" -> logout(params);
+                case "clear" -> clear();
+                case "quit" -> "quit";
                 default -> help();
             };
         } catch (Exception ex) {
@@ -115,10 +145,8 @@ public class ChessClient {
         }
     }
 
-    private void assertSignedIn() throws ClientException {
-        if (state == State.SIGNEDOUT) {
-            throw new ClientException();
-        }
+    private boolean assertSignedIn() {
+        return state != State.SIGNEDOUT;
     }
 }
 
