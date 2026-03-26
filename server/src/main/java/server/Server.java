@@ -3,7 +3,7 @@ package server;
 import dataaccess.*;
 import dataaccess.exception.*;
 import model.GameData;
-import service.requestandresult.*;
+import model.requestandresult.*;
 import com.google.gson.Gson;
 import io.javalin.*;
 import io.javalin.http.Context;

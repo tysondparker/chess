@@ -2,8 +2,8 @@ package service;
 
 import dataaccess.MemoryDataAccess;
 import dataaccess.exception.*;
+import model.requestandresult.*;
 import org.junit.jupiter.api.*;
-import service.requestandresult.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 

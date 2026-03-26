@@ -4,9 +4,9 @@ import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
 import dataaccess.exception.*;
 import model.GameData;
+import model.requestandresult.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import service.requestandresult.*;
 
 import java.util.List;
 

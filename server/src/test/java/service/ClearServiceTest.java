@@ -3,9 +3,9 @@ package service;
 import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
 import dataaccess.exception.*;
+import model.requestandresult.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import service.requestandresult.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 

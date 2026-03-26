@@ -9,6 +9,9 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 import model.UserData;
+import model.requestandresult.LoginRequest;
+import model.requestandresult.LogoutRequest;
+import model.requestandresult.RegisterResult;
 
 public class ServerFacade {
     private final HttpClient client = HttpClient.newHttpClient();
@@ -18,10 +21,23 @@ public class ServerFacade {
         finalUrl = url;
     }
 
-    public void register(UserData data) throws ClientException {
+    public RegisterResult register(UserData data) throws ClientException {
         var request = buildRequest("POST", "/user",data);
         var response = sendRequest(request);
-        handleResponse(response, UserData.class);
+        return handleResponse(response, RegisterResult.class);
+    }
+
+    public void login(LoginRequest loginRequest) throws ClientException {
+        var request = buildRequest("POST", "/session",loginRequest);
+        var response = sendRequest(request);
+        handleResponse(response, LoginRequest.class);
+    }
+
+    public void logout(String authToken) throws ClientException {
+        LogoutRequest logRequest = new LogoutRequest(authToken);
+        var request = buildRequest("DELETE", "/session", logRequest);
+        var response = sendRequest(request);
+        handleResponse(response, LoginRequest.class);
     }
 
     private HttpResponse<String> sendRequest(HttpRequest request) throws ClientException {
@@ -68,4 +84,5 @@ public class ServerFacade {
     private boolean isSuccessful(int status) {
         return status / 100 == 2;
     }
+
 }

@@ -1,6 +1,8 @@
 package client;
 
 import model.UserData;
+import model.requestandresult.LoginRequest;
+import model.requestandresult.RegisterResult;
 
 import java.util.Arrays;
 import java.util.Scanner;
@@ -9,6 +11,7 @@ public class ChessClient {
 
     private State state = State.SIGNEDOUT;
     private String userName = null;
+    private String authToken = null;
     private final ServerFacade server;
 
     public ChessClient(String serverUrl) {
@@ -38,7 +41,22 @@ public class ChessClient {
     }
 
     public String login(String... params) throws ClientException {
-        return null;
+        if (params.length >= 2) {
+            String username = params[0];
+            String password = params[1];
+            LoginRequest request = new LoginRequest(username,password);
+            server.login(request);
+            userName = username;
+            state = State.SIGNEDIN;
+            return String.format("You signed in as %s.", username);
+        }
+        throw new ClientException();
+    }
+    public String logout(String... params) throws ClientException {
+        assertSignedIn();
+        state = State.SIGNEDOUT;
+        server.logout(authToken);
+        return String.format("%s logged out", userName);
     }
 
     public String register(String... params) throws ClientException {
@@ -47,8 +65,9 @@ public class ChessClient {
             String password = params[1];
             String email = params[2];
             UserData newUser = new UserData(username,password,email);
-            server.register(newUser);
-            userName = username;
+            RegisterResult result = server.register(newUser);
+            userName = result.username();
+            authToken = result.authToken();
             state = State.SIGNEDIN;
             return String.format("You signed in as %s.", username);
         }
@@ -58,6 +77,7 @@ public class ChessClient {
     public String help() {
         if (state == State.SIGNEDOUT) {
             return """
+                    
                     - help (Actions you can take)
                     - quit (Exit the Program)
                     - Login <username> <password> (Login to play Chess)
@@ -65,6 +85,7 @@ public class ChessClient {
                     """;
         }
         return """
+                
                 - help (Actions you can take)
                 - Logout (Gets you out of here)
                 - create <GAMENAME> (Creates a game of Chess)
@@ -86,10 +107,17 @@ public class ChessClient {
             return switch (cmd) {
                 case "register" -> register(params);
                 case "login" -> login(params);
+                case "logout" -> logout(params);
                 default -> help();
             };
         } catch (Exception ex) {
             return ex.getMessage();
+        }
+    }
+
+    private void assertSignedIn() throws ClientException {
+        if (state == State.SIGNEDOUT) {
+            throw new ClientException();
         }
     }
 }
