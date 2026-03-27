@@ -125,6 +125,13 @@ public class ServerFacadeTests {
 
     @Test
     public void createGamePos() throws Exception {
+        RegisterRequest testUser = new RegisterRequest("Chica","five nights","freddy@gmail.com");
+        RegisterResult result1 = serverFacade.register(testUser);
+
+        CreateGameRequest request = new CreateGameRequest("Five Nights at Freddy's");
+        CreateGameResult result = serverFacade.createGame(request,result1.authToken());
+
+        assertNotNull(result);
     }
 
     @Test
