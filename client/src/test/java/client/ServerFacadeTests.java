@@ -160,6 +160,9 @@ public class ServerFacadeTests {
 
     @Test
     public void clearPos() throws Exception {
+        assertDoesNotThrow(() -> {
+            serverFacade.clear();
+        });
     }
 
     @Test
