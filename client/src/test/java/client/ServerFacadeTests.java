@@ -59,6 +59,15 @@ public class ServerFacadeTests {
 
     @Test
     public void loginTestPos() throws Exception {
+        RegisterRequest testUser = new RegisterRequest("Chica","five nights","freddy@gmail.com");
+        serverFacade.register(testUser);
+
+        LoginRequest loginRequest = new LoginRequest("Chica","five nights");
+        LoginResult result = serverFacade.login(loginRequest);
+
+        assertNotNull(result);
+        assertEquals("Chica",result.username());
+        assertNotNull(result.authToken());
     }
 
     @Test
