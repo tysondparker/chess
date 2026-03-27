@@ -1,8 +1,11 @@
 package client;
 
+import chess.ChessGame;
 import model.GameData;
 import model.requestandresult.*;
+import ui.BoardPrinter;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
@@ -10,8 +13,10 @@ import java.util.Scanner;
 public class ChessClient {
 
     private State state = State.SIGNEDOUT;
+    private GameState gameState = GameState.OUTGAME;
     private String userName = null;
     private String authToken = null;
+    private List<GameData> lastListedGames = new ArrayList<>();
     private final ServerFacade server;
 
     public ChessClient(String serverUrl) {
@@ -105,7 +110,8 @@ public class ChessClient {
 
         ListGamesRequest listGamesRequest = new ListGamesRequest(authToken);
         List<GameData> games = server.listGame(listGamesRequest).games();
-        StringBuilder out = new StringBuilder("Game # | Game Name | White Name | Black Namel");
+        lastListedGames = games;
+        StringBuilder out = new StringBuilder("Game # | Game Name | White Name | Black Name");
 
         for (int i = 0; i < games.size(); i++) {
             String result = gameListLoop(games, i);
@@ -115,20 +121,41 @@ public class ChessClient {
         return out.toString();
     }
 
-    private static String gameListLoop(List<GameData> gameList, int i) {
-        GameData curGame = gameList.get(i);
-        int gameNumber = i +1;
-        String white = " ? ";
-        String black = " ? ";
-        String name = curGame.gameName();
+    public String joinGame(String... params) throws ClientException{
+        if(!gameState.equals(GameState.OUTGAME)){
+            throw new ClientException("You're already playing a game");
+        }
+        if(params.length == 2) {
+            if (!assertSignedIn()) {
+                throw new ClientException("Sign in first!");
+            }
+            String gameIndex = params[0];
+            String colorString = params[1];
+            String color = colorString.toUpperCase();
 
-        if (curGame.whiteUsername() != null){
-            white = curGame.whiteUsername();
-        }
-        if (curGame.blackUsername() != null){
-            black = curGame.blackUsername();
-        }
-        return String.format("\n%d.) Game: %s White: %s Black: %s",gameNumber,name,white,black);
+            int gameIndexInt = Integer.parseInt(gameIndex)-1;
+
+            if(!color.equals("WHITE") && !color.equals("BLACK")) {
+                throw new ClientException("Enter either White or Black");
+            }
+
+            GameData game = lastListedGames.get(gameIndexInt);
+            String whiteUser = game.whiteUsername();
+            String blackUser = game.blackUsername();
+
+            if((color.equals("WHITE") && whiteUser != null) || (color.equals("BLACK") && blackUser != null)) {
+                throw new ClientException("Color already taken in this game. Try again.");
+            }
+
+            JoinGameRequest joinGameRequest = new JoinGameRequest(color,game.gameID());
+            server.joinGame(joinGameRequest, authToken);
+            gameState = GameState.INGAME;
+
+            BoardPrinter.drawBoard(game.game(), ChessGame.TeamColor.WHITE);
+
+            return String.format("Successfully joined game: %s", game.gameName());
+
+        } throw new ClientException("Whats the game number and what do you want to play as?");
     }
 
     public String clear() throws ClientException {
@@ -168,6 +195,22 @@ public class ChessClient {
                 """;
     }
 
+    private static String gameListLoop(List<GameData> gameList, int i) {
+        GameData curGame = gameList.get(i);
+        int gameNumber = i +1;
+        String white = " ? ";
+        String black = " ? ";
+        String name = curGame.gameName();
+
+        if (curGame.whiteUsername() != null){
+            white = curGame.whiteUsername();
+        }
+        if (curGame.blackUsername() != null){
+            black = curGame.blackUsername();
+        }
+        return String.format("\n%d.) Game: %s | White: %s | Black: %s",gameNumber,name,white,black);
+    }
+
     private void printPrompt() {
         System.out.print("\n" + ">>> ");
     }
@@ -189,6 +232,7 @@ public class ChessClient {
                 case "clear" -> clear();
                 case "quit" -> "quit";
                 case "create" -> createGame(params);
+                case "join" -> joinGame(params);
                 case "list" -> listGame();
                 default -> help();
             };
