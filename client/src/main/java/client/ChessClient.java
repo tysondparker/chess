@@ -1,10 +1,10 @@
 package client;
 
-import model.UserData;
-import model.requestandresult.LoginRequest;
-import model.requestandresult.RegisterResult;
+import model.GameData;
+import model.requestandresult.*;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 
 public class ChessClient {
@@ -45,15 +45,16 @@ public class ChessClient {
             String username = params[0];
             String password = params[1];
             LoginRequest request = new LoginRequest(username,password);
-            server.login(request);
+            LoginResult result = server.login(request);
             userName = username;
+            authToken = result.authToken();
             state = State.SIGNEDIN;
             return String.format("You signed in as %s.", username);
         }
         throw new ClientException("Remember Login <username> <password>");
     }
 
-    public String logout(String... params) throws ClientException {
+    public String logout() throws ClientException {
         if(state.equals(State.SIGNEDIN)){
             state = State.SIGNEDOUT;
             server.logout(authToken);
@@ -69,7 +70,7 @@ public class ChessClient {
             String password = params[1];
             String email = params[2];
 
-            UserData newUser = new UserData(username,password,email);
+            RegisterRequest newUser = new RegisterRequest(username,password,email);
             RegisterResult result = server.register(newUser);
 
             userName = result.username();
@@ -81,10 +82,59 @@ public class ChessClient {
         throw new ClientException("To Register Enter: register <username> <password> <email>");
     }
 
+    public String createGame(String... params) throws ClientException {
+        if(assertSignedIn()){
+            if(params.length == 1) {
+                String gameName = params[0];
+                CreateGameRequest gameRequest = new CreateGameRequest(gameName);
+                CreateGameResult gameResult = server.createGame(gameRequest,authToken);
+                return String.format("Game ID is: %d",gameResult.gameID());
+            } else {
+                return "Bad Request";
+            }
+
+        } else {
+            return "Not Logged in";
+        }
+    }
+
+    public String listGame() throws ClientException{
+        if(!assertSignedIn()){
+            throw new ClientException("Hey, you're not signed in!");
+        }
+
+        ListGamesRequest listGamesRequest = new ListGamesRequest(authToken);
+        List<GameData> games = server.listGame(listGamesRequest).games();
+        StringBuilder out = new StringBuilder("Game # | Game Name | White Name | Black Namel");
+
+        for (int i = 0; i < games.size(); i++) {
+            String result = gameListLoop(games, i);
+            out.append(result);
+        }
+        out.append("\n");
+        return out.toString();
+    }
+
+    private static String gameListLoop(List<GameData> gameList, int i) {
+        GameData curGame = gameList.get(i);
+        int gameNumber = i +1;
+        String white = " ? ";
+        String black = " ? ";
+        String name = curGame.gameName();
+
+        if (curGame.whiteUsername() != null){
+            white = curGame.whiteUsername();
+        }
+        if (curGame.blackUsername() != null){
+            black = curGame.blackUsername();
+        }
+        return String.format("\n%d.) Game: %s White: %s Black: %s",gameNumber,name,white,black);
+    }
+
     public String clear() throws ClientException {
         if(assertSignedIn()){
             Scanner scanner2 = new Scanner(System.in);
-            System.out.print("\n" + "Password: ");
+            System.out.print("Password: ");
             String line = scanner2.nextLine();
             if(line.equals("tp123")){
                 server.clear();
@@ -125,7 +175,7 @@ public class ChessClient {
     public String eval(String input) {
         try {
             String[] tokens = input.split(" ");
-            String cmd = "";
+            String cmd;
             if(tokens.length > 0) {
                 cmd = tokens[0].toLowerCase();
             } else {
@@ -135,9 +185,11 @@ public class ChessClient {
             return switch (cmd) {
                 case "register" -> register(params);
                 case "login" -> login(params);
-                case "logout" -> logout(params);
+                case "logout" -> logout();
                 case "clear" -> clear();
                 case "quit" -> "quit";
+                case "create" -> createGame(params);
+                case "list" -> listGame();
                 default -> help();
             };
         } catch (Exception ex) {

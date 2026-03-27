@@ -1,17 +1,12 @@
 package client;
 
 import com.google.gson.Gson;
-import model.GameData;
 
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-
-import model.UserData;
-import model.requestandresult.LoginRequest;
-import model.requestandresult.LogoutRequest;
-import model.requestandresult.RegisterResult;
+import model.requestandresult.*;
 
 public class ServerFacade {
     private final HttpClient client = HttpClient.newHttpClient();
@@ -21,27 +16,39 @@ public class ServerFacade {
         finalUrl = url;
     }
 
-    public RegisterResult register(UserData data) throws ClientException {
-        var request = buildRequest("POST", "/user",data);
+    public RegisterResult register(RegisterRequest registerRequest) throws ClientException {
+        var request = buildRequest("POST", "/user",registerRequest,null);
         var response = sendRequest(request);
         return handleResponse(response, RegisterResult.class);
     }
 
-    public void login(LoginRequest loginRequest) throws ClientException {
-        var request = buildRequest("POST", "/session",loginRequest);
+    public LoginResult login(LoginRequest loginRequest) throws ClientException {
+        var request = buildRequest("POST", "/session",loginRequest,null);
         var response = sendRequest(request);
-        handleResponse(response, LoginRequest.class);
+        return handleResponse(response, LoginResult.class);
     }
 
     public void logout(String authToken) throws ClientException {
         LogoutRequest logRequest = new LogoutRequest(authToken);
-        var request = buildRequest("DELETE", "/session", logRequest);
+        var request = buildRequest("DELETE", "/session", logRequest,authToken);
+        sendRequest(request);
+    }
+
+    public CreateGameResult createGame(CreateGameRequest gameRequest, String authToken) throws ClientException {
+        var request = buildRequest("POST","/game",gameRequest,authToken);
         var response = sendRequest(request);
+        return handleResponse(response,CreateGameResult.class);
+    }
+
+    public ListGamesResult listGame(ListGamesRequest listGamesRequest) throws ClientException {
+        var request = buildRequest("GET","/game",null,listGamesRequest.authToken());
+        var response = sendRequest(request);
+        return handleResponse(response, ListGamesResult.class);
     }
 
     public void clear() throws ClientException {
-        var request = buildRequest("DELETE", "/db",null);
-        var response = sendRequest(request);
+        var request = buildRequest("DELETE", "/db",null,null);
+        sendRequest(request);
     }
 
     private HttpResponse<String> sendRequest(HttpRequest request) throws ClientException {
@@ -52,10 +59,13 @@ public class ServerFacade {
         }
     }
 
-    private HttpRequest buildRequest(String method, String path, Object body) {
+    private HttpRequest buildRequest(String method, String path, Object body, String authToken) {
         var request = HttpRequest.newBuilder().uri(URI.create(finalUrl + path)).method(method,makeRequestBody(body));
         if (body != null) {
             request.setHeader("Content-Type", "application/json");
+        }
+        if (authToken != null) {
+            request.header("Authorization",authToken);
         }
         return request.build();
     }
