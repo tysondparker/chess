@@ -1,9 +1,12 @@
 package client;
 
+import model.GameData;
 import model.UserData;
 import model.requestandresult.*;
 import org.junit.jupiter.api.*;
 import server.Server;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -99,10 +102,21 @@ public class ServerFacadeTests {
 
     @Test
     public void logoutTestNeg() throws Exception {
+        assertThrows(ClientException.class, () -> {
+            serverFacade.logout(null);
+        });
     }
 
     @Test
     public void listGamePos() throws Exception {
+        RegisterRequest testUser = new RegisterRequest("Chica","five nights","freddy@gmail.com");
+        RegisterResult result1 = serverFacade.register(testUser);
+
+        ListGamesRequest request = new ListGamesRequest(result1.authToken());
+        ListGamesResult result = serverFacade.listGame(request);
+
+        assertNotNull(result);
+        assertNotNull(result.games());
     }
 
     @Test
