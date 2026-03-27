@@ -140,6 +140,18 @@ public class ServerFacadeTests {
 
     @Test
     public void joinGamePos() throws Exception {
+        RegisterRequest testUser = new RegisterRequest("Chica","five nights","freddy@gmail.com");
+        RegisterResult result1 = serverFacade.register(testUser);
+
+        CreateGameRequest request2 = new CreateGameRequest("Five Nights at Freddy's");
+        CreateGameResult result2 = serverFacade.createGame(request2,result1.authToken());
+
+        JoinGameRequest request = new JoinGameRequest("White", result2.gameID());
+        serverFacade.joinGame(request,result1.authToken());
+
+        assertDoesNotThrow(() -> {
+            serverFacade.joinGame(request,result1.authToken());
+        });
     }
 
     @Test
