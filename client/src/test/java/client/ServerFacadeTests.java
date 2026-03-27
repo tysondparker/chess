@@ -167,7 +167,11 @@ public class ServerFacadeTests {
 
     @Test
     public void clearNeg() throws Exception {
+        assertDoesNotThrow(() -> {
+            serverFacade.clear();
+        });
     }
+
 
 
 
