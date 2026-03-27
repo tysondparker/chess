@@ -72,6 +72,15 @@ public class ServerFacadeTests {
 
     @Test
     public void loginTestNeg() throws Exception {
+        RegisterRequest testUser = new RegisterRequest("Chica","five nights","freddy@gmail.com");
+        serverFacade.register(testUser);
+
+        LoginRequest loginRequest = new LoginRequest("Chica","wrong password");
+        serverFacade.login(loginRequest);
+
+        assertThrows(ClientException.class, () -> {
+            serverFacade.login(loginRequest);
+        });
     }
 
     @Test
