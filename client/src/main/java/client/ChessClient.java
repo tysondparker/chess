@@ -88,7 +88,7 @@ public class ChessClient {
     }
 
     public String createGame(String... params) throws ClientException {
-        if(assertSignedIn()){
+        if(!notSignedIn()){
             if(params.length == 1) {
                 String gameName = params[0];
                 CreateGameRequest gameRequest = new CreateGameRequest(gameName);
@@ -104,7 +104,7 @@ public class ChessClient {
     }
 
     public String listGame() throws ClientException{
-        if(!assertSignedIn()){
+        if(notSignedIn()){
             throw new ClientException("Hey, you're not signed in!");
         }
 
@@ -122,11 +122,11 @@ public class ChessClient {
     }
 
     public String joinGame(String... params) throws ClientException{
-        if(!gameState.equals(GameState.OUTGAME)){
+        if(gameState.equals(GameState.INGAME)){
             throw new ClientException("You're already playing a game");
         }
         if(params.length == 2) {
-            if (!assertSignedIn()) {
+            if (notSignedIn()) {
                 throw new ClientException("Sign in first!");
             }
             String gameIndex = params[0];
@@ -150,20 +150,47 @@ public class ChessClient {
             JoinGameRequest joinGameRequest = new JoinGameRequest(color,game.gameID());
             server.joinGame(joinGameRequest, authToken);
             gameState = GameState.INGAME;
-
-            BoardPrinter.drawBoard(game.game(), ChessGame.TeamColor.WHITE);
+            if(color.equals("WHITE")) {
+                BoardPrinter.drawBoard(game.game(), ChessGame.TeamColor.WHITE);
+            } else {
+                BoardPrinter.drawBoard(game.game(), ChessGame.TeamColor.BLACK);
+            }
 
             return String.format("Successfully joined game: %s", game.gameName());
 
         } throw new ClientException("Whats the game number and what do you want to play as?");
     }
 
+    public String observeGame (String... params) throws ClientException{
+        if(!gameState.equals(GameState.OUTGAME)){
+            throw new ClientException("You're playing a game right now, can't observe");
+        }
+        if(params.length == 1) {
+            if (notSignedIn()) {
+                throw new ClientException("Sign in first!");
+            }
+
+            String gameIndex = params[0];
+            int gameIndexInt = Integer.parseInt(gameIndex)-1;
+
+            GameData game = lastListedGames.get(gameIndexInt);
+
+            gameState = GameState.OBSERVE;
+
+            BoardPrinter.drawBoard(game.game(), ChessGame.TeamColor.WHITE);
+
+            return String.format("Successfully observing game: %s", game.gameName());
+
+        } throw new ClientException("To observe enter observe and the game number");
+    }
+
     public String clear() throws ClientException {
-        if(assertSignedIn()){
+        if(notSignedIn()){
             Scanner scanner2 = new Scanner(System.in);
             System.out.print("Password: ");
             String line = scanner2.nextLine();
             if(line.equals("tp123")){
+                logout();
                 server.clear();
                 return "Database Cleared";
             } else {
@@ -174,7 +201,7 @@ public class ChessClient {
     }
 
     public String help() {
-        if (!assertSignedIn()) {
+        if (notSignedIn()) {
             return """
                     
                     - help (Actions you can take)
@@ -234,6 +261,7 @@ public class ChessClient {
                 case "create" -> createGame(params);
                 case "join" -> joinGame(params);
                 case "list" -> listGame();
+                case "observe" -> observeGame(params);
                 default -> help();
             };
         } catch (Exception ex) {
@@ -241,8 +269,8 @@ public class ChessClient {
         }
     }
 
-    private boolean assertSignedIn() {
-        return state != State.SIGNEDOUT;
+    private boolean notSignedIn() {
+        return state == State.SIGNEDOUT;
     }
 }
 
