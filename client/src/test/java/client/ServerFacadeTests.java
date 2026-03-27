@@ -1,8 +1,11 @@
 package client;
 
+import model.UserData;
 import model.requestandresult.*;
 import org.junit.jupiter.api.*;
 import server.Server;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 
 public class ServerFacadeTests {
@@ -15,6 +18,7 @@ public class ServerFacadeTests {
         server = new Server();
         var port = server.run(0);
         System.out.println("Started test HTTP server on " + port);
+        serverFacade = new ServerFacade("http://localhost:" + port);
     }
 
     @BeforeEach
@@ -35,10 +39,22 @@ public class ServerFacadeTests {
 
     @Test
     public void registerTestPos() throws Exception {
+        RegisterRequest testUser = new RegisterRequest("Chica","five nights","freddy@gmail.com");
+        RegisterResult registerResult = serverFacade.register(testUser);
+
+        assertNotNull(registerResult);
+        assertEquals("Chica",registerResult.username());
+        assertNotNull(registerResult.authToken());
     }
 
     @Test
     public void registerTestNeg() throws Exception {
+        RegisterRequest testUser = new RegisterRequest("Chica",null,"freddy@gmail.com");
+        serverFacade.register(testUser);
+
+        assertThrows(ClientException.class, () -> {
+            serverFacade.register(testUser);
+        });
     }
 
     @Test
