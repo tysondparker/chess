@@ -78,9 +78,9 @@ public class BoardPrinter {
     private static void makeSquare(ChessPiece piece, boolean evenSquare) {
         String backGroundColor;
         if(evenSquare){
-            backGroundColor = EscapeSequences.SET_BG_COLOR_WHITE;
-        } else {
             backGroundColor = EscapeSequences.SET_BG_COLOR_BLACK;
+        } else {
+            backGroundColor = EscapeSequences.SET_BG_COLOR_WHITE;
         }
 
         System.out.print(backGroundColor);

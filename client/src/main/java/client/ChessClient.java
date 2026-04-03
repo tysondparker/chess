@@ -13,7 +13,7 @@ import java.util.Scanner;
 public class ChessClient {
 
     private State state = State.SIGNEDOUT;
-    private GameState gameState = GameState.OUTGAME;
+//    private GameState gameState = GameState.OUTGAME;
     private String userName = null;
     private String authToken = null;
     private List<GameData> lastListedGames = new ArrayList<>();
@@ -50,11 +50,15 @@ public class ChessClient {
             String username = params[0];
             String password = params[1];
             LoginRequest request = new LoginRequest(username,password);
-            LoginResult result = server.login(request);
-            userName = username;
-            authToken = result.authToken();
-            state = State.SIGNEDIN;
-            return String.format("You signed in as %s.", username);
+            try {
+                LoginResult result = server.login(request);
+                userName = username;
+                authToken = result.authToken();
+                state = State.SIGNEDIN;
+                return String.format("You signed in as %s.", username);
+            } catch (Exception e) {
+                throw new ClientException("Wrong Password or Username");
+            }
         }
         throw new ClientException("Remember Login <username> <password>");
     }
@@ -93,9 +97,9 @@ public class ChessClient {
                 String gameName = params[0];
                 CreateGameRequest gameRequest = new CreateGameRequest(gameName);
                 CreateGameResult gameResult = server.createGame(gameRequest,authToken);
-                return String.format("Game ID is: %d",gameResult.gameID());
+                return String.format("Created game: %s",gameName);
             } else {
-                return "Bad Request";
+                return "Remember create <Game Name>";
             }
 
         } else {
@@ -122,9 +126,9 @@ public class ChessClient {
     }
 
     public String joinGame(String... params) throws ClientException{
-        if(gameState.equals(GameState.INGAME)){
-            throw new ClientException("You're already playing a game");
-        }
+//        if(gameState.equals(GameState.INGAME)){
+//            throw new ClientException("You're already playing a game");
+//        }
         if(params.length == 2) {
             if (notSignedIn()) {
                 throw new ClientException("Sign in first!");
@@ -139,7 +143,14 @@ public class ChessClient {
                 throw new ClientException("Enter either White or Black");
             }
 
+            try {
+                GameData game = lastListedGames.get(gameIndexInt);
+            } catch (Exception e) {
+                throw new ClientException("Make sure you enter join <Game Number from List Games>");
+            }
+
             GameData game = lastListedGames.get(gameIndexInt);
+
             String whiteUser = game.whiteUsername();
             String blackUser = game.blackUsername();
 
@@ -149,7 +160,8 @@ public class ChessClient {
 
             JoinGameRequest joinGameRequest = new JoinGameRequest(color,game.gameID());
             server.joinGame(joinGameRequest, authToken);
-            gameState = GameState.INGAME;
+
+//            gameState = GameState.INGAME;
             if(color.equals("WHITE")) {
                 BoardPrinter.drawBoard(game.game(), ChessGame.TeamColor.WHITE);
             } else {
@@ -162,9 +174,9 @@ public class ChessClient {
     }
 
     public String observeGame (String... params) throws ClientException{
-        if(!gameState.equals(GameState.OUTGAME)){
-            throw new ClientException("You're playing a game right now, can't observe");
-        }
+//        if(!gameState.equals(GameState.OUTGAME)){
+//            throw new ClientException("You're playing a game right now, can't observe");
+//        }
         if(params.length == 1) {
             if (notSignedIn()) {
                 throw new ClientException("Sign in first!");
@@ -173,9 +185,14 @@ public class ChessClient {
             String gameIndex = params[0];
             int gameIndexInt = Integer.parseInt(gameIndex)-1;
 
+            try {
+                GameData game = lastListedGames.get(gameIndexInt);
+            } catch (Exception e) {
+                throw new ClientException("Make sure you enter observe <Game Number from List Games>");
+            }
             GameData game = lastListedGames.get(gameIndexInt);
 
-            gameState = GameState.OBSERVE;
+//            gameState = GameState.OBSERVE;
 
             BoardPrinter.drawBoard(game.game(), ChessGame.TeamColor.WHITE);
 
