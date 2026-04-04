@@ -12,13 +12,18 @@ import java.util.Scanner;
 
 public class ChessClient {
 
-    private State state = State.SIGNEDOUT;
-//    private GameState gameState = GameState.OUTGAME;
+//user states:
+    private UserState userState = UserState.SIGNEDOUT;
+    private GameState gameState = GameState.OUTGAME;
+//user info:
     private String userName = null;
     private String authToken = null;
+//Game info:
     private List<GameData> lastListedGames = new ArrayList<>();
+//Server:
     private final ServerFacade server;
 
+//    Creates Chess Client
     public ChessClient(String serverUrl) {
         server = new ServerFacade(serverUrl);
     }
@@ -45,6 +50,7 @@ public class ChessClient {
         System.out.println();
     }
 
+//    pre-login UI
     public String login(String... params) throws ClientException {
         if (params.length == 2) {
             String username = params[0];
@@ -54,7 +60,7 @@ public class ChessClient {
                 LoginResult result = server.login(request);
                 userName = username;
                 authToken = result.authToken();
-                state = State.SIGNEDIN;
+                userState = UserState.SIGNEDIN;
                 return String.format("You signed in as %s.", username);
             } catch (Exception e) {
                 throw new ClientException("Wrong Password or Username");
@@ -62,17 +68,6 @@ public class ChessClient {
         }
         throw new ClientException("Remember Login <username> <password>");
     }
-
-    public String logout() throws ClientException {
-        if(state.equals(State.SIGNEDIN)){
-            state = State.SIGNEDOUT;
-            server.logout(authToken);
-            return String.format("%s logged out", userName);
-        } else {
-            return "Not logged in";
-        }
-    }
-
     public String register(String... params) throws ClientException {
         if (params.length == 3) {
             String username = params[0];
@@ -84,13 +79,23 @@ public class ChessClient {
 
             userName = result.username();
             authToken = result.authToken();
-            state = State.SIGNEDIN;
+            userState = UserState.SIGNEDIN;
 
             return String.format("You're successfully signed in as %s.", username);
         }
         throw new ClientException("To Register Enter: register <username> <password> <email>");
     }
 
+//    post-login UI
+    public String logout() throws ClientException {
+        if(userState.equals(UserState.SIGNEDIN)){
+            userState = UserState.SIGNEDOUT;
+            server.logout(authToken);
+            return String.format("%s logged out", userName);
+        } else {
+            return "Not logged in";
+        }
+    }
     public String createGame(String... params) throws ClientException {
         if(!notSignedIn()){
             if(params.length == 1) {
@@ -106,7 +111,6 @@ public class ChessClient {
             return "Not Logged in";
         }
     }
-
     public String listGame() throws ClientException{
         if(notSignedIn()){
             throw new ClientException("Hey, you're not signed in!");
@@ -124,11 +128,10 @@ public class ChessClient {
         out.append("\n");
         return out.toString();
     }
-
     public String joinGame(String... params) throws ClientException{
-//        if(gameState.equals(GameState.INGAME)){
-//            throw new ClientException("You're already playing a game");
-//        }
+        if(gameState.equals(GameState.INGAME)){
+            throw new ClientException("You're already playing a game");
+        }
         if(params.length == 2) {
             if (notSignedIn()) {
                 throw new ClientException("Sign in first!");
@@ -161,7 +164,7 @@ public class ChessClient {
             JoinGameRequest joinGameRequest = new JoinGameRequest(color,game.gameID());
             server.joinGame(joinGameRequest, authToken);
 
-//            gameState = GameState.INGAME;
+            gameState = GameState.INGAME;
             if(color.equals("WHITE")) {
                 BoardPrinter.drawBoard(game.game(), ChessGame.TeamColor.WHITE);
             } else {
@@ -172,11 +175,10 @@ public class ChessClient {
 
         } throw new ClientException("Whats the game number and what do you want to play as?");
     }
-
     public String observeGame (String... params) throws ClientException{
-//        if(!gameState.equals(GameState.OUTGAME)){
-//            throw new ClientException("You're playing a game right now, can't observe");
-//        }
+        if(!gameState.equals(GameState.OUTGAME)){
+            throw new ClientException("You're playing a game right now, can't observe");
+        }
         if(params.length == 1) {
             if (notSignedIn()) {
                 throw new ClientException("Sign in first!");
@@ -192,7 +194,7 @@ public class ChessClient {
             }
             GameData game = lastListedGames.get(gameIndexInt);
 
-//            gameState = GameState.OBSERVE;
+            gameState = GameState.OBSERVE;
 
             BoardPrinter.drawBoard(game.game(), ChessGame.TeamColor.WHITE);
 
@@ -200,7 +202,9 @@ public class ChessClient {
 
         } throw new ClientException("To observe enter observe and the game number");
     }
-
+    public String findMoves(String[] params) {
+        return null;
+    }
     public String clear() throws ClientException {
         if(notSignedIn()){
             Scanner scanner2 = new Scanner(System.in);
@@ -217,6 +221,19 @@ public class ChessClient {
         return "Not Signed in";
     }
 
+//    game UI
+    public String resign() {
+        return null;
+    }
+    public String makeMove(String[] params) {
+        return null;
+    }
+    public String leave() {
+        return null;
+    }
+    public String redraw() {
+        return null;
+    }
     public String help() {
         if (notSignedIn()) {
             return """
@@ -226,19 +243,31 @@ public class ChessClient {
                     - Login <username> <password> (Login to play Chess)
                     - register <username> <password> <email> (To Register)
                     """;
+        } else if (inGame()) {
+            return """
+                    
+                    - help (Actions you can take)
+                    - redraw (redraws the board)
+                    - leave (leaves the game)
+                    - move <starting square> <ending square> (moves a chess piece)
+                    - resign (forfeits the game)
+                    - find <chess piece> (finds all possible moves)
+                    """;
+        } else {
+            return """
+                    
+                    - help (Actions you can take)
+                    - Logout (Gets you out of here)
+                    - create <GAMENAME> (Creates a game of Chess)
+                    - list (Lists all the Games)
+                    - join <ID> <WHITE|BLACK> (Allows you to Play a Game)
+                    - observe <ID> (Allows you to observe a game)
+                    - quit
+                    """;
         }
-        return """
-                
-                - help (Actions you can take)
-                - Logout (Gets you out of here)
-                - create <GAMENAME> (Creates a game of Chess)
-                - list (Lists all the Games)
-                - join <ID> <WHITE|BLACK> (Allows you to Play a Game)
-                - observe <ID> (Allows you to observe a game)
-                - quit
-                """;
     }
 
+//    helpers
     private static String gameListLoop(List<GameData> gameList, int i) {
         GameData curGame = gameList.get(i);
         int gameNumber = i +1;
@@ -254,11 +283,17 @@ public class ChessClient {
         }
         return String.format("\n%d.) Game: %s | White: %s | Black: %s",gameNumber,name,white,black);
     }
-
     private void printPrompt() {
         System.out.print("\n" + ">>> ");
     }
+    private boolean notSignedIn() {
+        return userState == UserState.SIGNEDOUT;
+    }
+    private boolean inGame() {
+        return gameState != GameState.OUTGAME;
+    }
 
+//    main eval loop
     public String eval(String input) {
         try {
             String[] tokens = input.split(" ");
@@ -269,25 +304,37 @@ public class ChessClient {
                 cmd = "help";
             }
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
-            return switch (cmd) {
-                case "register" -> register(params);
-                case "login" -> login(params);
-                case "logout" -> logout();
-                case "clear" -> clear();
-                case "quit" -> "quit";
-                case "create" -> createGame(params);
-                case "join" -> joinGame(params);
-                case "list" -> listGame();
-                case "observe" -> observeGame(params);
-                default -> help();
-            };
+            if(notSignedIn()) {
+                return switch (cmd) {
+                    case "quit" -> "quit";
+                    case "login" -> login(params);
+                    case "register" -> register(params);
+                    default -> help();
+                };
+            } else if (inGame()) {
+                return switch (cmd) {
+                    case "redraw" -> redraw();
+                    case "leave" -> leave();
+                    case "move" -> makeMove(params);
+                    case "resign" -> resign();
+                    case "find" -> findMoves(params);
+                    case "clear" -> clear();
+                    default -> help();
+                };
+            } else {
+                return switch (cmd) {
+                    case "logout" -> logout();
+                    case "create" -> createGame(params);
+                    case "list" -> listGame();
+                    case "join" -> joinGame(params);
+                    case "observe" -> observeGame(params);
+                    case "quit" -> "quit";
+                    default -> help();
+                };
+            }
         } catch (Exception ex) {
             return ex.getMessage();
         }
-    }
-
-    private boolean notSignedIn() {
-        return state == State.SIGNEDOUT;
     }
 }
 
