@@ -1,5 +1,7 @@
 package websocket.commands;
 
+import com.google.gson.Gson;
+
 import java.util.Objects;
 
 /**
@@ -21,6 +23,7 @@ public class UserGameCommand {
         this.authToken = authToken;
         this.gameID = gameID;
     }
+
 
     public enum CommandType {
         CONNECT,

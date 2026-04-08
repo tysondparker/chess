@@ -4,6 +4,7 @@ import dataaccess.*;
 import dataaccess.exception.*;
 import model.*;
 import model.requestandresult.*;
+import org.jetbrains.annotations.NotNull;
 import org.mindrot.jbcrypt.BCrypt;
 
 import static java.util.UUID.randomUUID;
@@ -16,7 +17,7 @@ public class UserService {
         this.dataAccess = dataAccess;
     }
 
-    public RegisterResult register(RegisterRequest request) throws DataAccessException {
+    public RegisterResult register(@NotNull RegisterRequest request) throws DataAccessException {
         if ((request.username() == null || request.password() == null || request.email() == null)) {
             throw new BadRequestException("Error: bad request");
         }

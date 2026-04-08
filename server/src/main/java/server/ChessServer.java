@@ -7,20 +7,24 @@ import model.requestandresult.*;
 import com.google.gson.Gson;
 import io.javalin.*;
 import io.javalin.http.Context;
+import server.websocket.WebSocketHandler;
 import service.*;
 import service.UserService;
 
 import java.util.List;
 import java.util.Map;
 
-public class Server {
+import static io.javalin.apibuilder.ApiBuilder.ws;
+
+public class ChessServer {
 
     private final Javalin javalin;
     private final UserService service;
     private final GameService gameService;
     private final ClearService clearService;
+    private final WebSocketHandler webSocketHandler;
 
-    public Server() {
+    public ChessServer() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
         DataAccess dataAccess;
         try {
@@ -32,6 +36,8 @@ public class Server {
         this.service = new UserService(dataAccess);
         this.gameService = new GameService(dataAccess);
         this.clearService = new ClearService(dataAccess);
+
+        webSocketHandler = new WebSocketHandler(dataAccess);
 
 //        SqlError 500
         javalin.exception(SqlDataAccessException.class,(ex, ctx)-> {
@@ -71,6 +77,12 @@ public class Server {
 
         javalin.delete("/db", this::clear);
         javalin.delete("/session", this::logout);
+
+        javalin.ws("/ws", ws -> {
+            ws.onConnect(webSocketHandler);
+            ws.onMessage(webSocketHandler);
+            ws.onClose(webSocketHandler);
+        });
     }
 
     public int run(int desiredPort) {

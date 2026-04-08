@@ -4,6 +4,7 @@ import chess.*;
 public class BoardPrinter {
 
     public static void drawBoard(ChessGame game, ChessGame.TeamColor color){
+        System.out.print("\n");
 //        Set up the board
         ChessBoard board = game.getBoard();
         int rowStart, rowEnd, rowStep;

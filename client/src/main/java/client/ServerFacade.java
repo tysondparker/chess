@@ -6,6 +6,8 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+
+import model.GameData;
 import model.requestandresult.*;
 
 public class ServerFacade {
@@ -38,6 +40,11 @@ public class ServerFacade {
         var request = buildRequest("POST","/game",gameRequest,authToken);
         var response = sendRequest(request);
         return handleResponse(response,CreateGameResult.class);
+    }
+
+    public void updateGame(GameData gameData) throws ClientException {
+        var request = buildRequest("POST","/game",gameData,null);
+        sendRequest(request);
     }
 
     public ListGamesResult listGame(ListGamesRequest listGamesRequest) throws ClientException {

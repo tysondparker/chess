@@ -1,25 +1,21 @@
 package client;
 
-import model.GameData;
-import model.UserData;
 import model.requestandresult.*;
 import org.junit.jupiter.api.*;
-import server.Server;
-
-import java.util.List;
+import server.ChessServer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 
-public class ServerFacadeTests {
+public class ChessServerFacadeTests {
 
-    private static Server server;
+    private static ChessServer chessServer;
     private static ServerFacade serverFacade;
 
     @BeforeAll
     public static void init() {
-        server = new Server();
-        var port = server.run(0);
+        chessServer = new ChessServer();
+        var port = chessServer.run(0);
         System.out.println("Started test HTTP server on " + port);
         serverFacade = new ServerFacade("http://localhost:" + port);
     }
@@ -31,7 +27,7 @@ public class ServerFacadeTests {
 
     @AfterAll
     static void stopServer() {
-        server.stop();
+        chessServer.stop();
     }
 
 
