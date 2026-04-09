@@ -145,11 +145,11 @@ public class ServerFacadeTests {
 
     @Test
     public void createGameNeg() throws Exception {
-        RegisterRequest testUser = new RegisterRequest("Chica","five nights","freddy@gmail.com");
+        RegisterRequest testUser = new RegisterRequest("BobDylan","Lovinglifeman","ummwhatyasay");
         RegisterResult result1 = serverFacade.register(testUser);
 
-        CreateGameRequest request = new CreateGameRequest("Five Nights at Freddy's");
-        CreateGameResult result = serverFacade.createGame(request,result1.authToken());
+        CreateGameRequest request = new CreateGameRequest("Goofy gary's emporium");
+        serverFacade.createGame(request,result1.authToken());
 
         ListGamesRequest request6 = new ListGamesRequest(result1.authToken());
         ListGamesResult result6 = serverFacade.listGame(request6);
@@ -157,7 +157,6 @@ public class ServerFacadeTests {
 
         assertNotNull(result6.games().getFirst());
     }
-
 
     @Test
     public void joinGamePos() throws Exception {
