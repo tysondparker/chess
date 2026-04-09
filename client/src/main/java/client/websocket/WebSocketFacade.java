@@ -60,6 +60,7 @@ public class WebSocketFacade extends Endpoint {
     public void onOpen(Session session, EndpointConfig endpointConfig) {}
 
     public void connect(String authToken, int gameId) throws WebSocketException {
+        System.out.println("Connected to Server");
         try {
             UserGameCommand userGameCommand = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameId);
             this.session.getBasicRemote().sendText(new Gson().toJson(userGameCommand));
@@ -69,6 +70,7 @@ public class WebSocketFacade extends Endpoint {
     }
 
     public void makeMove(String authToken, int gameId, ChessMove move) throws WebSocketException {
+        System.out.println("Inside Make Move");
         try {
             MakeMoveCommand command = new MakeMoveCommand(authToken, gameId, move);
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
@@ -78,6 +80,7 @@ public class WebSocketFacade extends Endpoint {
     }
 
     public void resign(String authToken, int gameId) {
+        System.out.println("Inside Resign");
         try {
             ResignCommand resignCommand = new ResignCommand(authToken,gameId);
             this.session.getBasicRemote().sendText(new Gson().toJson(resignCommand));
@@ -87,6 +90,7 @@ public class WebSocketFacade extends Endpoint {
     }
 
     public void leave(String authToken, int gameId) {
+        System.out.println("Inside leave");
         try {
             LeaveCommand leaveCommand = new LeaveCommand(authToken,gameId);
             this.session.getBasicRemote().sendText(new Gson().toJson(leaveCommand));
