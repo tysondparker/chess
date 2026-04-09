@@ -35,7 +35,7 @@ public class ChessClient implements ServiceMessageHandler {
     }
 
     public void run(){
-        System.out.println(" Welcome to Chess 240, Signin to Start");
+        System.out.println("Hello and welcome to Chess 240, Signin to Start");
         System.out.print(help());
 
         Scanner scanner = new Scanner(System.in);
@@ -62,7 +62,8 @@ public class ChessClient implements ServiceMessageHandler {
             case LOAD_GAME -> {
                 LoadGameMessage loadGameMessage = (LoadGameMessage) message;
                 ChessGame game = loadGameMessage.getGame();
-                userGame = new GameData(userGame.gameID(), userGame.whiteUsername(), userGame.blackUsername(), userGame.gameName(), game);
+                userGame = new GameData(userGame.gameID(), userGame.whiteUsername(),
+                        userGame.blackUsername(), userGame.gameName(), game);
 
                     if("BLACK".equals(userColor)) {
                         BoardPrinter.drawBoard(game, ChessGame.TeamColor.BLACK);
@@ -93,12 +94,12 @@ public class ChessClient implements ServiceMessageHandler {
                 userName = username;
                 authToken = result.authToken();
                 userState = UserState.SIGNEDIN;
-                return String.format("You signed in as %s.", username);
+                return String.format("You signed in as %s. \n", username);
             } catch (Exception e) {
-                throw new ClientException("Wrong Password or Username");
+                throw new ClientException("Wrong Password or Username \n");
             }
         }
-        throw new ClientException("Remember Login <username> <password>");
+        throw new ClientException("Remember Login <username> <password> \n");
     }
     public String register(String... params) throws ClientException {
         if (params.length == 3) {
@@ -113,9 +114,9 @@ public class ChessClient implements ServiceMessageHandler {
             authToken = result.authToken();
             userState = UserState.SIGNEDIN;
 
-            return String.format("You're successfully signed in as %s.", username);
+            return String.format("You're successfully signed in as %s.\n", username);
         }
-        throw new ClientException("To Register Enter: register <username> <password> <email>");
+        throw new ClientException("To Register Enter: register <username> <password> <email>\n");
     }
     public String help() {
         if (notSignedIn()) {
@@ -155,9 +156,9 @@ public class ChessClient implements ServiceMessageHandler {
         if(userState.equals(UserState.SIGNEDIN)){
             userState = UserState.SIGNEDOUT;
             server.logout(authToken);
-            return String.format("%s logged out", userName);
+            return String.format("%s logged out \n", userName);
         } else {
-            return "Not logged in";
+            return "Not logged in\n";
         }
     }
     public String createGame(String... params) throws ClientException {
@@ -166,13 +167,13 @@ public class ChessClient implements ServiceMessageHandler {
                 String gameName = params[0];
                 CreateGameRequest gameRequest = new CreateGameRequest(gameName);
                 server.createGame(gameRequest,authToken);
-                return String.format("Created game: %s",gameName);
+                return String.format("Created game: %s\n",gameName);
             } else {
-                return "Remember create <Game Name>";
+                return "Remember create <Game Name>\n";
             }
 
         } else {
-            return "Not Logged in";
+            return "Not Logged in\n";
         }
     }
     public String listGame() throws ClientException{
@@ -201,7 +202,7 @@ public class ChessClient implements ServiceMessageHandler {
 
             if((color.equals("WHITE") && whiteUser != null) ||
                     (color.equals("BLACK") && blackUser != null)) {
-                throw new ClientException("Color already taken in this game. Try again.");
+                throw new ClientException("Color already taken in this game. Try again.\n");
             }
 
             JoinGameRequest joinGameRequest = new JoinGameRequest(color,game.gameID());
@@ -213,9 +214,9 @@ public class ChessClient implements ServiceMessageHandler {
 
             ws.connect(authToken,game.gameID());
 
-            return String.format("Successfully joined game: %s", game.gameName());
+            return String.format("Successfully joined game: %s\n", game.gameName());
 
-        } throw new ClientException("Whats the game number and what do you want to play as?");
+        } throw new ClientException("Whats the game number and what do you want to play as?\n");
     }
     public String observeGame (String... params) throws ClientException{
         if(params.length == 1) {
@@ -231,12 +232,12 @@ public class ChessClient implements ServiceMessageHandler {
 
                 ws.connect(authToken,game.gameID());
 
-                return String.format("Successfully observing game: %s", game.gameName());
+                return String.format("Successfully observing game: %s\n", game.gameName());
             } catch (Exception e) {
-                throw new ClientException("Make sure you enter observe <Game Number from List Games>");
+                throw new ClientException("Make sure you enter observe <Game Number from List Games>\n");
             }
 
-        } throw new ClientException("To observe enter observe and the game number");
+        } throw new ClientException("To observe enter observe and the game number\n");
     }
     public String clear() throws ClientException {
         Scanner clearScanner = new Scanner(System.in);
@@ -245,25 +246,25 @@ public class ChessClient implements ServiceMessageHandler {
         if (line.equals("tp123")) {
             logout();
             server.clear();
-            return "Database Cleared";
+            return "Database Cleared\n";
         } else {
-            return "Wrong Password";
+            return "Wrong Password\n";
         }
     }
 
 //    game UI
     public String resign() throws ClientException {
         Scanner leaveScanner = new Scanner(System.in);
-        System.out.print("Are you sure you want to resign? <yes/no>: ");
+        System.out.print("Are you sure you want to resign? <yes/no>: \n");
         String line = leaveScanner.nextLine().toUpperCase();
         if(line.equals("YES")) {
             ws.resign(authToken, userGame.gameID());
         } else if (line.equals("NO")) {
-            System.out.print("I guess you didn't want to resign, alright then.");
+            System.out.print("I guess you didn't want to resign, alright then.\n");
         } else {
-            throw new ClientException("If you want to resign, you need to type either yes or no!");
+            throw new ClientException("If you want to resign, you need to type either yes or no!\n");
         }
-        return "resigned";
+        return "resigned\n";
     }
     public String makeMove(String... params) throws Exception {
 //        get and verify the start and end positions
@@ -277,7 +278,7 @@ public class ChessClient implements ServiceMessageHandler {
 
         ChessMove chessMove = verifyUserChessMove(startPositionString, endPositionString, promotionPiece);
         ws.makeMove(authToken, userGame.gameID(), chessMove);
-        return "Websocket sent?";
+        return "\n";
     }
     public String leave() {
         ws.leave(authToken,userGame.gameID());
@@ -285,7 +286,7 @@ public class ChessClient implements ServiceMessageHandler {
         userColor = null;
         userGame = null;
         gameState = GameState.OUTGAME;
-        return "you're not in the game anymore";
+        return "you're not in the game anymore\n";
     }
     public String findMoves(String... params) {
         return null;
