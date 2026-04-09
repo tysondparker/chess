@@ -25,7 +25,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     private final ConnectionManager connections = new ConnectionManager();
     private final DataAccess dataAccess;
-    private Collection<String> resigned;
+    private Collection<Integer> resigned;
     private Collection<String> observers;
 
     public WebSocketHandler(DataAccess dataAccess) {
@@ -107,18 +107,20 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     private void makeMove(MakeMoveCommand command, Session session) throws Exception {
 
-        if(isResigned(command.getAuthToken())) {
-            connections.notify(session, new ErrorMessage("Hey, you resigned, you can't move"));
-            return;
-        }
-        if(isObserver(command.getAuthToken())){
-            connections.notify(session, new ErrorMessage("Observers can't move"));
-            return;
-        }
-
         AuthData authData = dataAccess.getAuth(command.getAuthToken());
         if(authData == null) {
             connections.notify(session, new ErrorMessage("Couldn't connect"));
+            return;
+        }
+
+        if(isResigned(command.getGameID())) {
+            connections.notify(session, new ErrorMessage("Hey, you resigned, you can't move"));
+            return;
+        }
+
+        String username = authData.username();
+        if(isObserver(username)){
+            connections.notify(session, new ErrorMessage("Observers can't move"));
             return;
         }
 
@@ -129,8 +131,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
 
         ChessGame game = gameData.game();
-
-        String username = authData.username();
 
         ChessGame.TeamColor playerColor;
         if (username.equals(gameData.whiteUsername())) {
@@ -210,24 +210,25 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             return;
         }
 
-        if(isResigned(username)) {
+        if(isResigned(game.gameID())) {
             connections.notify(session, new ErrorMessage("You can't resign again silly goose"));
             return;
         }
 
         String resignMessage = String.format("%s forfeited the game",username);
 
+        this.resigned.add(game.gameID());
+
         NotificationMessage message = new NotificationMessage(resignMessage);
         connections.broadcast(command.getGameID(), null,message);
-        resigned.add(username);
     }
 
     private void leave(String authToken, Session session) {
 
     }
 
-    private Boolean isResigned(String username) {
-        return this.resigned != null && this.resigned.contains(username);
+    private Boolean isResigned(int gameId) {
+        return this.resigned != null && this.resigned.contains(gameId);
     }
 
     private Boolean isObserver(String username) {
