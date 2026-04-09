@@ -4,6 +4,7 @@ import client.WebSocketException;
 import com.google.gson.Gson;
 import jakarta.websocket.*;
 import websocket.commands.MakeMoveCommand;
+import websocket.commands.ResignCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
@@ -74,6 +75,15 @@ public class WebSocketFacade extends Endpoint {
         try {
             MakeMoveCommand command = new MakeMoveCommand(authToken, gameId, move);
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
+        } catch(Exception ex) {
+            throw new WebSocketException("Sorry, couldn't connect");
+        }
+    }
+
+    public void resign(String authToken, int gameId) {
+        try {
+            ResignCommand resignCommand = new ResignCommand(authToken,gameId);
+            this.session.getBasicRemote().sendText(new Gson().toJson(resignCommand));
         } catch(Exception ex) {
             throw new WebSocketException("Sorry, couldn't connect");
         }

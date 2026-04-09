@@ -179,10 +179,6 @@ public class ChessClient implements ServiceMessageHandler {
         }
     }
     public String listGame() throws ClientException{
-        if(notSignedIn()){
-            throw new ClientException("Hey, you're not signed in!");
-        }
-
         ListGamesRequest listGamesRequest = new ListGamesRequest(authToken);
         List<GameData> games = server.listGame(listGamesRequest).games();
         lastListedGames = games;
@@ -259,12 +255,22 @@ public class ChessClient implements ServiceMessageHandler {
     }
 
 //    game UI
-    public String resign() {
-        return null;
+    public String resign() throws ClientException {
+        Scanner leaveScanner = new Scanner(System.in);
+        System.out.print("Are you sure you want to resign? <yes/no>: ");
+        String line = leaveScanner.nextLine().toUpperCase();
+        if(line.equals("YES")) {
+            ws.resign(authToken, userGame.gameID());
+        } else if (line.equals("NO")) {
+            System.out.print("I guess you didn't want to resign, alright then.");
+        } else {
+            throw new ClientException("If you want to resign, you need to type either yes or no!");
+        }
+        return "resigned";
     }
+
     public String makeMove(String... params) throws Exception {
 //        get and verify the start and end positions
-
         String startPositionString = params[0];
         String endPositionString = params[1];
         ChessPiece.PieceType promotionPiece = null;
@@ -277,7 +283,6 @@ public class ChessClient implements ServiceMessageHandler {
         ws.makeMove(authToken, userGame.gameID(), chessMove);
         return "Websocket sent?";
     }
-
     public String leave() {
         Scanner leaveScanner = new Scanner(System.in);
         System.out.print("Are you sure you want to leave? <yes/no>: ");
@@ -296,11 +301,9 @@ public class ChessClient implements ServiceMessageHandler {
             return "ok, I guess you're staying.";
         }
     }
-
     private void updateGame(int gameID, String whiteUsername, String blackUsername, String gameName, ChessGame game) {
         new GameData(gameID,whiteUsername,blackUsername,gameName,game);
     }
-
     public String findMoves(String[] params) {
         return null;
     }

@@ -5,12 +5,12 @@ import chess.ChessMove;
 import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
-import dataaccess.exception.DataAccessException;
 import model.AuthData;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import io.javalin.websocket.*;
 import websocket.commands.MakeMoveCommand;
+import websocket.commands.ResignCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
@@ -45,7 +45,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                     MakeMoveCommand makeMoveCommand = new Gson().fromJson(ctx.message(), MakeMoveCommand.class);
                     makeMove(makeMoveCommand, ctx.session);
                 }
-                case RESIGN -> resign(userGameCommand.getAuthToken(), ctx.session);
+                case RESIGN -> {
+                    ResignCommand resignCommand = new Gson().fromJson(ctx.message(), ResignCommand.class);
+                    resign(resignCommand, ctx.session);
+                }
                 case LEAVE -> leave(userGameCommand.getAuthToken(), ctx.session);
             }
         } catch (Exception ex) {
@@ -168,18 +171,27 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             if(game.isInCheckmate(opponentColor)) {
                 message = new NotificationMessage(username+ " has put you in checkmate! Game over");
                 connections.broadcast(gameData.gameID(), session,message);
+                message = new NotificationMessage("YOU WON!");
+                connections.notify(session,message);
                 return;
             }
             message = new NotificationMessage(username+ " has put you in check!");
             connections.broadcast(gameData.gameID(), session,message);
         } else if (game.isInStalemate(opponentColor)) {
             message = new NotificationMessage("You're in stalemate! Game over");
-            connections.broadcast(gameData.gameID(), session,message);
+            connections.broadcast(gameData.gameID(),null,message);
         }
     }
 
-    private void resign(String authToken, Session session) {
+    private void resign(ResignCommand command, Session session) throws Exception {
+        AuthData authData = dataAccess.getAuth(command.getAuthToken());
+        String username = authData.username();
 
+        String resignMessage = String.format("%s forfeited the game",username);
+
+        NotificationMessage message = new NotificationMessage(resignMessage);
+        connections.broadcast(command.getGameID(), null,message);
+        connections.remove(session);
     }
 
     private void leave(String authToken, Session session) {
