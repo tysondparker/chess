@@ -16,7 +16,7 @@ import java.util.Map;
 
 import static io.javalin.apibuilder.ApiBuilder.ws;
 
-public class ChessServer {
+public class Server {
 
     private final Javalin javalin;
     private final UserService service;
@@ -24,7 +24,7 @@ public class ChessServer {
     private final ClearService clearService;
     private final WebSocketHandler webSocketHandler;
 
-    public ChessServer() {
+    public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
         DataAccess dataAccess;
         try {

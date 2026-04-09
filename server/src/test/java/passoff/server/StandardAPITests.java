@@ -3,7 +3,7 @@ package passoff.server;
 import chess.ChessGame;
 import org.junit.jupiter.api.*;
 import passoff.model.*;
-import server.ChessServer;
+import server.Server;
 
 import java.net.HttpURLConnection;
 import java.util.*;
@@ -15,20 +15,20 @@ public class StandardAPITests {
     private static TestUser newUser;
     private static TestCreateRequest createRequest;
     private static TestServerFacade serverFacade;
-    private static ChessServer chessServer;
+    private static Server server;
     private String existingAuth;
 
     // ### TESTING SETUP/CLEANUP ###
 
     @AfterAll
     static void stopServer() {
-        chessServer.stop();
+        server.stop();
     }
 
     @BeforeAll
     public static void init() {
-        chessServer = new ChessServer();
-        var port = chessServer.run(0);
+        server = new Server();
+        var port = server.run(0);
         System.out.println("Started test HTTP server on " + port);
 
         serverFacade = new TestServerFacade("localhost", Integer.toString(port));
