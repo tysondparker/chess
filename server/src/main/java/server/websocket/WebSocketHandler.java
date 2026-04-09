@@ -17,16 +17,21 @@ import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 
 public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
 
     private final ConnectionManager connections = new ConnectionManager();
     private final DataAccess dataAccess;
-    private Boolean isResigned = false;
+    private Collection<String> resigned;
+    private Collection<String> observers;
 
     public WebSocketHandler(DataAccess dataAccess) {
         this.dataAccess = dataAccess;
+        this.resigned = new ArrayList<>();
+        this.observers = new ArrayList<>();
     }
 
 
@@ -94,6 +99,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             note = username + " joined game as black.";
         } else {
             note = username + " joined as an observer";
+            this.observers.add(username);
         }
 
         connections.broadcast(gameData.gameID(), session, new NotificationMessage(note));
@@ -101,8 +107,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     private void makeMove(MakeMoveCommand command, Session session) throws Exception {
 
-        if(isResigned) {
+        if(isResigned(command.getAuthToken())) {
             connections.notify(session, new ErrorMessage("Hey, you resigned, you can't move"));
+            return;
+        }
+        if(isObserver(command.getAuthToken())){
+            connections.notify(session, new ErrorMessage("Observers can't move"));
             return;
         }
 
@@ -195,12 +205,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
         GameData game = dataAccess.getGame(command.getGameID());
 
-        if(!username.equals(game.whiteUsername()) && !username.equals(game.blackUsername())) {
+        if(isObserver(username)) {
             connections.notify(session, new ErrorMessage("Observers can't resign silly"));
             return;
         }
 
-        if(isResigned) {
+        if(isResigned(username)) {
             connections.notify(session, new ErrorMessage("You can't resign again silly goose"));
             return;
         }
@@ -209,10 +219,18 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
         NotificationMessage message = new NotificationMessage(resignMessage);
         connections.broadcast(command.getGameID(), null,message);
-        isResigned = true;
+        resigned.add(username);
     }
 
     private void leave(String authToken, Session session) {
 
+    }
+
+    private Boolean isResigned(String username) {
+        return this.resigned != null && this.resigned.contains(username);
+    }
+
+    private Boolean isObserver(String username) {
+        return this.observers != null && this.observers.contains(username);
     }
 }
