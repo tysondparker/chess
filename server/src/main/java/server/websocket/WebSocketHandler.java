@@ -5,7 +5,6 @@ import chess.ChessMove;
 import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
-import dataaccess.exception.DataAccessException;
 import model.AuthData;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
@@ -233,8 +232,21 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         AuthData authData = dataAccess.getAuth(command.getAuthToken());
         String username = authData.username();
         GameData gameData = dataAccess.getGame(command.getGameID());
+        GameData updatedGame;
 
+        if(username.equals(gameData.whiteUsername())) {
+            updatedGame = new GameData(gameData.gameID(), null, gameData.blackUsername(), gameData.gameName(), gameData.game());
+            dataAccess.updateGame(updatedGame);
+        } else if (username.equals(gameData.blackUsername())) {
+            updatedGame = new GameData(gameData.gameID(), gameData.whiteUsername(),null, gameData.gameName(), gameData.game());
+            dataAccess.updateGame(updatedGame);
+        } else {
+            observers.remove(username);
+        }
 
+        connections.remove(session);
+        NotificationMessage message = new NotificationMessage(String.format("%s left the game", username));
+        connections.broadcast(command.getGameID(), null ,message);
     }
 
     private Boolean isResigned(int gameId) {
