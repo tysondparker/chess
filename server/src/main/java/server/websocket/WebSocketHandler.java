@@ -193,6 +193,13 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         AuthData authData = dataAccess.getAuth(command.getAuthToken());
         String username = authData.username();
 
+        GameData game = dataAccess.getGame(command.getGameID());
+
+        if(!username.equals(game.whiteUsername()) || !username.equals(game.blackUsername())) {
+            connections.notify(session, new ErrorMessage("Observers can't resign silly"));
+            return;
+        }
+
         String resignMessage = String.format("%s forfeited the game",username);
 
         NotificationMessage message = new NotificationMessage(resignMessage);
