@@ -29,7 +29,7 @@ public class ChessClient implements ServiceMessageHandler {
     private final WebSocketFacade ws;
 
 //    Creates Chess Client
-    public ChessClient(String serverUrl) throws Exception {
+    public ChessClient(String serverUrl) {
         server = new ServerFacade(serverUrl);
         ws = new WebSocketFacade(serverUrl, this);
     }
@@ -288,9 +288,7 @@ public class ChessClient implements ServiceMessageHandler {
         gameState = GameState.OUTGAME;
         return "you're not in the game anymore";
     }
-    private void updateGame(int gameID, String whiteUsername, String blackUsername, String gameName, ChessGame game) {
-        new GameData(gameID,whiteUsername,blackUsername,gameName,game);
-    }
+
     public String findMoves(String... params) {
         return null;
     }

@@ -20,7 +20,7 @@ public class WebSocketFacade extends Endpoint {
     Session session;
     ServiceMessageHandler serviceMessageHandler;
 
-    public WebSocketFacade(String url, ServiceMessageHandler serviceMessageHandler) throws Exception {
+    public WebSocketFacade(String url, ServiceMessageHandler serviceMessageHandler) {
         try {
             url = url.replace("http", "ws");
             URI socketURI = new URI(url + "/ws");

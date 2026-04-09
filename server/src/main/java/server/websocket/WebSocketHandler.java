@@ -166,19 +166,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
         connections.broadcast(updatedGame.gameID(), null, new LoadGameMessage(game));
 
-        Map<Integer, String> numbermap = Map.of(
-                1,"A", 2, "B", 3, "C", 4,
-                "D", 5, "E", 6, "F", 7,
-                "G", 8, "H"
-        );
-
-        int startCol = command.getMove().getStartPosition().getColumn();
-        String startRow = numbermap.get(command.getMove().getStartPosition().getRow());
-
-        int endCol = command.getMove().getEndPosition().getColumn();
-        String endRow = numbermap.get(command.getMove().getEndPosition().getRow());
-
-        NotificationMessage notificationMessage = new NotificationMessage(String.format("%s moved %s%d to %s%d",username,startRow,startCol,endRow,endCol));
+        NotificationMessage notificationMessage = getMessageForClient(command, username);
         connections.broadcast(updatedGame.gameID(),session,notificationMessage);
 
         ChessGame.TeamColor opponentColor = ChessGame.TeamColor.WHITE;
@@ -202,6 +190,23 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             message = new NotificationMessage("You're in stalemate! Game over");
             connections.broadcast(gameData.gameID(),null,message);
         }
+    }
+
+    @NotNull
+    private static NotificationMessage getMessageForClient(MakeMoveCommand command, String username) {
+        Map<Integer, String> numbermap = Map.of(
+                1,"A", 2, "B", 3, "C", 4,
+                "D", 5, "E", 6, "F", 7,
+                "G", 8, "H"
+        );
+
+        int startCol = command.getMove().getStartPosition().getColumn();
+        String startRow = numbermap.get(command.getMove().getStartPosition().getRow());
+
+        int endCol = command.getMove().getEndPosition().getColumn();
+        String endRow = numbermap.get(command.getMove().getEndPosition().getRow());
+
+        return new NotificationMessage(String.format("%s moved %s%d to %s%d", username,startRow,startCol,endRow,endCol));
     }
 
     private void resign(ResignCommand command, Session session) throws Exception {
