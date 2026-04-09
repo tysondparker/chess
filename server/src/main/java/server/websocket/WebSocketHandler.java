@@ -195,8 +195,13 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
         GameData game = dataAccess.getGame(command.getGameID());
 
-        if(!username.equals(game.whiteUsername()) || !username.equals(game.blackUsername())) {
+        if(!username.equals(game.whiteUsername()) && !username.equals(game.blackUsername())) {
             connections.notify(session, new ErrorMessage("Observers can't resign silly"));
+            return;
+        }
+
+        if(isResigned) {
+            connections.notify(session, new ErrorMessage("You can't resign again silly goose"));
             return;
         }
 
