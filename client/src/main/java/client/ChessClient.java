@@ -35,7 +35,7 @@ public class ChessClient implements ServiceMessageHandler {
     }
 
     public void run(){
-        System.out.println(" Welcome to Chess 240. Sign in to start.");
+        System.out.println(" Welcome to Chess 240, Signin to Start");
         System.out.print(help());
 
         Scanner scanner = new Scanner(System.in);
@@ -55,7 +55,6 @@ public class ChessClient implements ServiceMessageHandler {
         }
         System.out.println();
     }
-
 
     @Override
     public void notify(ServerMessage message) {
@@ -121,7 +120,7 @@ public class ChessClient implements ServiceMessageHandler {
     public String help() {
         if (notSignedIn()) {
             return """
-                    
+                    Available Actions:
                     - help (Actions you can take)
                     - quit (Exit the Program)
                     - Login <username> <password> (Login to play Chess)
@@ -129,7 +128,7 @@ public class ChessClient implements ServiceMessageHandler {
                     """;
         } else if (inGame()) {
             return """
-                    
+                    Available Actions:
                     - help (Actions you can take)
                     - redraw (redraws the board)
                     - leave (leaves the game)
@@ -139,7 +138,7 @@ public class ChessClient implements ServiceMessageHandler {
                     """;
         } else {
             return """
-                    
+                    Available Actions:
                     - help (Actions you can take)
                     - Logout (Gets you out of here)
                     - create <Game Name> (Creates a game of Chess)
@@ -288,7 +287,6 @@ public class ChessClient implements ServiceMessageHandler {
         gameState = GameState.OUTGAME;
         return "you're not in the game anymore";
     }
-
     public String findMoves(String... params) {
         return null;
     }
@@ -318,7 +316,7 @@ public class ChessClient implements ServiceMessageHandler {
         return String.format("\n%d.) Game: %s | White: %s | Black: %s",gameNumber,name,white,black);
     }
     private void printPrompt() {
-        System.out.print("\n" + ">>> ");
+        System.out.print(">>> ");
     }
     private boolean notSignedIn() {
         return userState == UserState.SIGNEDOUT;
@@ -339,7 +337,6 @@ public class ChessClient implements ServiceMessageHandler {
             throw new ClientException("Make sure you enter join <Game Number from List Games>");
         }
     }
-
     private ChessMove verifyUserChessMove(String startPositionString, String endPositionString, ChessPiece.PieceType promotionPiece) throws ClientException {
 
         String startPositionColString = String.valueOf(startPositionString.charAt(0)).toUpperCase();
