@@ -281,22 +281,12 @@ public class ChessClient implements ServiceMessageHandler {
         return "Websocket sent?";
     }
     public String leave() {
-        Scanner leaveScanner = new Scanner(System.in);
-        System.out.print("Are you sure you want to leave? <yes/no>: ");
-        String line = leaveScanner.nextLine().toUpperCase();
-        if (line.equals("YES")) {
-            if(Objects.equals(userColor, "WHITE")) {
-                updateGame(userGame.gameID(), null, userGame.blackUsername(), userGame.gameName(), userGame.game());
-            } else {
-                updateGame(userGame.gameID(), userGame.whiteUsername(), null, userGame.gameName(), userGame.game());
-            }
-            userColor = null;
-            userGame = null;
-            gameState = GameState.OUTGAME;
-            return "you're not in the game anymore";
-        } else {
-            return "ok, I guess you're staying.";
-        }
+        ws.leave(authToken,userGame.gameID());
+
+        userColor = null;
+        userGame = null;
+        gameState = GameState.OUTGAME;
+        return "you're not in the game anymore";
     }
     private void updateGame(int gameID, String whiteUsername, String blackUsername, String gameName, ChessGame game) {
         new GameData(gameID,whiteUsername,blackUsername,gameName,game);

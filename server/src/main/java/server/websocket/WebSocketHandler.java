@@ -5,10 +5,13 @@ import chess.ChessMove;
 import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
+import dataaccess.exception.DataAccessException;
 import model.AuthData;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import io.javalin.websocket.*;
+import org.jetbrains.annotations.NotNull;
+import websocket.commands.LeaveCommand;
 import websocket.commands.MakeMoveCommand;
 import websocket.commands.ResignCommand;
 import websocket.commands.UserGameCommand;
@@ -25,8 +28,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     private final ConnectionManager connections = new ConnectionManager();
     private final DataAccess dataAccess;
-    private Collection<Integer> resigned;
-    private Collection<String> observers;
+    private final Collection<Integer> resigned;
+    private final Collection<String> observers;
 
     public WebSocketHandler(DataAccess dataAccess) {
         this.dataAccess = dataAccess;
@@ -42,7 +45,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     @Override
-    public void handleMessage(WsMessageContext ctx) {
+    public void handleMessage(@NotNull WsMessageContext ctx) {
         try {
             UserGameCommand userGameCommand = new Gson().fromJson(ctx.message(), UserGameCommand.class);
             switch (userGameCommand.getCommandType()) {
@@ -55,7 +58,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                     ResignCommand resignCommand = new Gson().fromJson(ctx.message(), ResignCommand.class);
                     resign(resignCommand, ctx.session);
                 }
-                case LEAVE -> leave(userGameCommand.getAuthToken(), ctx.session);
+                case LEAVE -> {
+                    LeaveCommand leaveCommand = new Gson().fromJson(ctx.message(), LeaveCommand.class);
+                    leave(leaveCommand, ctx.session);
+                }
             }
         } catch (Exception ex) {
             try {
@@ -66,7 +72,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     @Override
-    public void handleClose(WsCloseContext ctx) {
+    public void handleClose(@NotNull WsCloseContext ctx) {
         System.out.println("Websocket closed");
     }
 
@@ -223,15 +229,18 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         connections.broadcast(command.getGameID(), null,message);
     }
 
-    private void leave(String authToken, Session session) {
+    private void leave(LeaveCommand command, Session session) throws Exception {
+        AuthData authData = dataAccess.getAuth(command.getAuthToken());
+        String username = authData.username();
+        GameData gameData = dataAccess.getGame(command.getGameID());
+
 
     }
 
     private Boolean isResigned(int gameId) {
-        return this.resigned != null && this.resigned.contains(gameId);
+        return this.resigned.contains(gameId);
     }
-
     private Boolean isObserver(String username) {
-        return this.observers != null && this.observers.contains(username);
+        return this.observers.contains(username);
     }
 }

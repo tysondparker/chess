@@ -3,6 +3,7 @@ import chess.ChessMove;
 import client.WebSocketException;
 import com.google.gson.Gson;
 import jakarta.websocket.*;
+import websocket.commands.LeaveCommand;
 import websocket.commands.MakeMoveCommand;
 import websocket.commands.ResignCommand;
 import websocket.commands.UserGameCommand;
@@ -13,7 +14,6 @@ import websocket.messages.ServerMessage;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 
 public class WebSocketFacade extends Endpoint {
 
@@ -30,26 +30,23 @@ public class WebSocketFacade extends Endpoint {
             this.session = container.connectToServer(this, socketURI);
 
             //set message handler
-            this.session.addMessageHandler(new MessageHandler.Whole<String>() {
-                @Override
-                public void onMessage(String message) {
-                    ServerMessage baseMessage = new Gson().fromJson(message, ServerMessage.class);
+            this.session.addMessageHandler((MessageHandler.Whole<String>) message -> {
+                ServerMessage baseMessage = new Gson().fromJson(message, ServerMessage.class);
 
-                    switch (baseMessage.getServerMessageType()) {
-                        case LOAD_GAME -> {
-                            System.out.println("Load_Game was called");
-                            System.out.println("raw message: \n" + message);
-                            LoadGameMessage loadGameMessage = new Gson().fromJson(message, LoadGameMessage.class);
-                            serviceMessageHandler.notify(loadGameMessage);
-                        }
-                        case NOTIFICATION -> {
-                            NotificationMessage notificationMessage = new Gson().fromJson(message, NotificationMessage.class);
-                            serviceMessageHandler.notify(notificationMessage);
-                        }
-                        case ERROR -> {
-                            ErrorMessage errorMessage = new Gson().fromJson(message, ErrorMessage.class);
-                            serviceMessageHandler.notify(errorMessage);
-                        }
+                switch (baseMessage.getServerMessageType()) {
+                    case LOAD_GAME -> {
+                        System.out.println("Load_Game was called");
+                        System.out.println("raw message: \n" + message);
+                        LoadGameMessage loadGameMessage = new Gson().fromJson(message, LoadGameMessage.class);
+                        serviceMessageHandler.notify(loadGameMessage);
+                    }
+                    case NOTIFICATION -> {
+                        NotificationMessage notificationMessage = new Gson().fromJson(message, NotificationMessage.class);
+                        serviceMessageHandler.notify(notificationMessage);
+                    }
+                    case ERROR -> {
+                        ErrorMessage errorMessage = new Gson().fromJson(message, ErrorMessage.class);
+                        serviceMessageHandler.notify(errorMessage);
                     }
                 }
             });
@@ -71,7 +68,7 @@ public class WebSocketFacade extends Endpoint {
         }
     }
 
-    public void makeMove(String authToken, int gameId, ChessMove move) throws WebSocketException, IOException {
+    public void makeMove(String authToken, int gameId, ChessMove move) throws WebSocketException {
         try {
             MakeMoveCommand command = new MakeMoveCommand(authToken, gameId, move);
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
@@ -84,6 +81,15 @@ public class WebSocketFacade extends Endpoint {
         try {
             ResignCommand resignCommand = new ResignCommand(authToken,gameId);
             this.session.getBasicRemote().sendText(new Gson().toJson(resignCommand));
+        } catch(Exception ex) {
+            throw new WebSocketException("Sorry, couldn't connect");
+        }
+    }
+
+    public void leave(String authToken, int gameId) {
+        try {
+            LeaveCommand leaveCommand = new LeaveCommand(authToken,gameId);
+            this.session.getBasicRemote().sendText(new Gson().toJson(leaveCommand));
         } catch(Exception ex) {
             throw new WebSocketException("Sorry, couldn't connect");
         }
