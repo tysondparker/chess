@@ -30,26 +30,7 @@ public class WebSocketFacade extends Endpoint {
             this.session = container.connectToServer(this, socketURI);
 
             //set message handler
-            this.session.addMessageHandler((MessageHandler.Whole<String>) message -> {
-                ServerMessage baseMessage = new Gson().fromJson(message, ServerMessage.class);
-
-                switch (baseMessage.getServerMessageType()) {
-                    case LOAD_GAME -> {
-                        System.out.println("Load_Game was called");
-                        System.out.println("raw message: \n" + message);
-                        LoadGameMessage loadGameMessage = new Gson().fromJson(message, LoadGameMessage.class);
-                        serviceMessageHandler.notify(loadGameMessage);
-                    }
-                    case NOTIFICATION -> {
-                        NotificationMessage notificationMessage = new Gson().fromJson(message, NotificationMessage.class);
-                        serviceMessageHandler.notify(notificationMessage);
-                    }
-                    case ERROR -> {
-                        ErrorMessage errorMessage = new Gson().fromJson(message, ErrorMessage.class);
-                        serviceMessageHandler.notify(errorMessage);
-                    }
-                }
-            });
+            setMessageHandler();
         } catch (Exception ex) {
             throw new WebSocketException("Couldn't connect to Server.");
         }
@@ -97,5 +78,26 @@ public class WebSocketFacade extends Endpoint {
         } catch(Exception ex) {
             throw new WebSocketException("Sorry, couldn't connect");
         }
+    }
+
+    public void setMessageHandler() {
+        this.session.addMessageHandler((MessageHandler.Whole<String>) message -> {
+            ServerMessage baseMessage = new Gson().fromJson(message, ServerMessage.class);
+
+            switch (baseMessage.getServerMessageType()) {
+                case LOAD_GAME -> {
+                    LoadGameMessage loadGameMessage = new Gson().fromJson(message, LoadGameMessage.class);
+                    serviceMessageHandler.notify(loadGameMessage);
+                }
+                case NOTIFICATION -> {
+                    NotificationMessage notificationMessage = new Gson().fromJson(message, NotificationMessage.class);
+                    serviceMessageHandler.notify(notificationMessage);
+                }
+                case ERROR -> {
+                    ErrorMessage errorMessage = new Gson().fromJson(message, ErrorMessage.class);
+                    serviceMessageHandler.notify(errorMessage);
+                }
+            }
+        });
     }
 }

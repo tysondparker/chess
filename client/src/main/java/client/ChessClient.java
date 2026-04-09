@@ -338,7 +338,8 @@ public class ChessClient implements ServiceMessageHandler {
             throw new ClientException("Make sure you enter join <Game Number from List Games>");
         }
     }
-    private ChessMove verifyUserChessMove(String startPositionString, String endPositionString, ChessPiece.PieceType promotionPiece) throws ClientException {
+    private ChessMove verifyUserChessMove(String startPositionString, String endPositionString,
+                                          ChessPiece.PieceType promotionPiece) throws ClientException {
 
         String startPositionColString = String.valueOf(startPositionString.charAt(0)).toUpperCase();
         int startPositionRow = Integer.parseInt(String.valueOf(startPositionString.charAt(1)));
