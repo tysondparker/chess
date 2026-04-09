@@ -23,6 +23,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     private final ConnectionManager connections = new ConnectionManager();
     private final DataAccess dataAccess;
+    private Boolean isResigned = false;
 
     public WebSocketHandler(DataAccess dataAccess) {
         this.dataAccess = dataAccess;
@@ -99,6 +100,11 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     private void makeMove(MakeMoveCommand command, Session session) throws Exception {
+
+        if(isResigned) {
+            connections.notify(session, new ErrorMessage("Hey, you resigned, you can't move"));
+            return;
+        }
 
         AuthData authData = dataAccess.getAuth(command.getAuthToken());
         if(authData == null) {
@@ -191,7 +197,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
         NotificationMessage message = new NotificationMessage(resignMessage);
         connections.broadcast(command.getGameID(), null,message);
-        connections.remove(session);
+        isResigned = true;
     }
 
     private void leave(String authToken, Session session) {

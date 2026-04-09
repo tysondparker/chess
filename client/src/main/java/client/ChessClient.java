@@ -10,8 +10,6 @@ import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
-
-import java.io.IOException;
 import java.util.*;
 
 public class ChessClient implements ServiceMessageHandler {
@@ -144,7 +142,7 @@ public class ChessClient implements ServiceMessageHandler {
                     
                     - help (Actions you can take)
                     - Logout (Gets you out of here)
-                    - create <GAMENAME> (Creates a game of Chess)
+                    - create <Game Name> (Creates a game of Chess)
                     - list (Lists all the Games)
                     - join <ID> <WHITE|BLACK> (Allows you to Play a Game)
                     - observe <ID> (Allows you to observe a game)
@@ -268,7 +266,6 @@ public class ChessClient implements ServiceMessageHandler {
         }
         return "resigned";
     }
-
     public String makeMove(String... params) throws Exception {
 //        get and verify the start and end positions
         String startPositionString = params[0];
@@ -304,7 +301,7 @@ public class ChessClient implements ServiceMessageHandler {
     private void updateGame(int gameID, String whiteUsername, String blackUsername, String gameName, ChessGame game) {
         new GameData(gameID,whiteUsername,blackUsername,gameName,game);
     }
-    public String findMoves(String[] params) {
+    public String findMoves(String... params) {
         return null;
     }
     public String redraw() {
@@ -349,12 +346,10 @@ public class ChessClient implements ServiceMessageHandler {
         }
 
         try {
-            GameData game = lastListedGames.get(gameIndexInt);
+            return lastListedGames.get(gameIndexInt);
         } catch (Exception e) {
             throw new ClientException("Make sure you enter join <Game Number from List Games>");
         }
-
-        return lastListedGames.get(gameIndexInt);
     }
 
     private ChessMove verifyUserChessMove(String startPositionString, String endPositionString, ChessPiece.PieceType promotionPiece) throws ClientException {
