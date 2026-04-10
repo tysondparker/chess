@@ -424,7 +424,7 @@ public class ChessClient implements ServiceMessageHandler {
                     case "resign" -> resign();
                     case "find" -> findMoves(params);
                     case "help" -> help();
-                    case "logout","create","list","join","observe", "clear", "login","register","quit" -> "You need to leave the game to do that.";
+                    case "logout","create","list","join","observe", "clear", "login","register","quit" -> "You need to leave the game to do that.\n";
                     default -> String.format("Sorry, %s isn't a valid command, try using one of the following:",cmd)+help();
                 };
             } else {
@@ -436,8 +436,8 @@ public class ChessClient implements ServiceMessageHandler {
                     case "observe" -> observeGame(params);
                     case "help" -> help();
                     case "clear" -> clear();
-                    case "find","resign","move","leave","redraw" -> "You must join a game to use those commands.";
-                    case "login","register","quit" -> "In order to do this, you must first logout.";
+                    case "find","resign","move","leave","redraw" -> "You must join a game to use those commands.\n";
+                    case "login","register","quit" -> "In order to do this, you must first logout.\n";
                     default -> String.format("Sorry, %s isn't a valid command, try using one of the following:",cmd)+help();
                 };
             }

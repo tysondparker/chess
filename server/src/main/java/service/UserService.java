@@ -38,15 +38,15 @@ public class UserService {
 
     public LoginResult login(LoginRequest request) throws DataAccessException {
         if (request.username() == null || request.password() == null) {
-            throw new BadRequestException("Error: bad request");
+            throw new BadRequestException("Error: bad request\n");
         }
 
         if (dataAccess.getUser(request.username()) == null) {
-            throw new UnauthorizedException("Error: bad request");
+            throw new UnauthorizedException("Error: bad request\n");
         }
 
         if (!BCrypt.checkpw(request.password(),dataAccess.getUser(request.username()).password())){
-            throw new UnauthorizedException("Error: bad request");
+            throw new UnauthorizedException("Error: bad request\n");
         }
 
         UserData user = dataAccess.getUser(request.username());
@@ -60,7 +60,7 @@ public class UserService {
 
     public void logout(LogoutRequest request) throws DataAccessException {
         if (request.authToken() == null || dataAccess.getAuth(request.authToken()) == null) {
-            throw new UnauthorizedException("Error: bad request");
+            throw new UnauthorizedException("Error: bad request\n");
         }
 
         AuthData authData = dataAccess.getAuth(request.authToken());
