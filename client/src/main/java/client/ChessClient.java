@@ -26,12 +26,13 @@ public class ChessClient implements ServiceMessageHandler {
     private List<GameData> lastListedGames = new ArrayList<>();
 //Server:
     private final ServerFacade server;
-    private final WebSocketFacade ws;
+    private WebSocketFacade ws;
+    private final String serverUrl;
 
 //    Creates Chess Client
     public ChessClient(String serverUrl) {
         server = new ServerFacade(serverUrl);
-        ws = new WebSocketFacade(serverUrl, this);
+        this.serverUrl = serverUrl;
     }
 
     public void run(){
@@ -66,9 +67,9 @@ public class ChessClient implements ServiceMessageHandler {
                         userGame.blackUsername(), userGame.gameName(), game);
 
                     if("BLACK".equals(userColor)) {
-                        BoardPrinter.drawBoard(game, ChessGame.TeamColor.BLACK);
+                        BoardPrinter.drawBoard(game, ChessGame.TeamColor.BLACK,null);
                     } else {
-                        BoardPrinter.drawBoard(game, ChessGame.TeamColor.WHITE);
+                        BoardPrinter.drawBoard(game, ChessGame.TeamColor.WHITE,null);
                     }
             }
             case NOTIFICATION -> {
@@ -167,6 +168,7 @@ public class ChessClient implements ServiceMessageHandler {
                 String gameName = params[0];
                 CreateGameRequest gameRequest = new CreateGameRequest(gameName);
                 server.createGame(gameRequest,authToken);
+                updateGameList(authToken);
                 return String.format("Created game: %s\n",gameName);
             } else {
                 return "Remember create <Game Name>\n";
@@ -177,11 +179,9 @@ public class ChessClient implements ServiceMessageHandler {
         }
     }
     public String listGame() throws ClientException{
-        ListGamesRequest listGamesRequest = new ListGamesRequest(authToken);
-        List<GameData> games = server.listGame(listGamesRequest).games();
-        lastListedGames = games;
+        updateGameList(authToken);
         StringBuilder out = new StringBuilder("Game # | Game Name | White Name | Black Name");
-
+        List<GameData> games = lastListedGames;
         for (int i = 0; i < games.size(); i++) {
             String result = gameListLoop(games, i);
             out.append(result);
@@ -190,7 +190,7 @@ public class ChessClient implements ServiceMessageHandler {
         return out.toString();
     }
     public String joinGame(String... params) throws ClientException{
-
+        updateGameList(authToken);
         if(params.length == 2) {
             String gameIndex = params[0];
             String color = params[1].toUpperCase();
@@ -212,13 +212,15 @@ public class ChessClient implements ServiceMessageHandler {
             gameState = GameState.INGAME;
             userColor = color;
 
+            ws = new WebSocketFacade(serverUrl, this);
             ws.connect(authToken,game.gameID());
-
             return String.format("Successfully joined game: %s\n", game.gameName());
 
         } throw new ClientException("Whats the game number and what do you want to play as?\n");
     }
     public String observeGame (String... params) throws ClientException{
+        updateGameList(authToken);
+        ws = new WebSocketFacade(serverUrl, this);
         if(params.length == 1) {
             String gameIndex = params[0];
             int gameIndexInt = Integer.parseInt(gameIndex)-1;
@@ -231,7 +233,6 @@ public class ChessClient implements ServiceMessageHandler {
                 userGame = game;
 
                 ws.connect(authToken,game.gameID());
-
                 return String.format("Successfully observing game: %s\n", game.gameName());
             } catch (Exception e) {
                 throw new ClientException("Make sure you enter observe <Game Number from List Games>\n");
@@ -268,34 +269,47 @@ public class ChessClient implements ServiceMessageHandler {
     }
     public String makeMove(String... params) throws Exception {
 //        get and verify the start and end positions
-        String startPositionString = params[0];
-        String endPositionString = params[1];
-        ChessPiece.PieceType promotionPiece = null;
+        try {
+            String startPositionString = params[0];
+            String endPositionString = params[1];
+            ChessPiece.PieceType promotionPiece = null;
 
-        if (params.length == 3) {
-            promotionPiece = ChessPiece.PieceType.valueOf(params[2]);
+            if (params.length == 3) {
+                promotionPiece = ChessPiece.PieceType.valueOf(params[2]);
+            }
+
+            ChessMove chessMove = verifyUserChessMove(startPositionString, endPositionString, promotionPiece);
+            ws.makeMove(authToken, userGame.gameID(), chessMove);
+            return "\n";
+        } catch (Exception ex) {
+            throw new ClientException(ex.getMessage());
         }
-
-        ChessMove chessMove = verifyUserChessMove(startPositionString, endPositionString, promotionPiece);
-        ws.makeMove(authToken, userGame.gameID(), chessMove);
-        return "\n";
     }
-    public String leave() {
+    public String leave() throws ClientException {
         ws.leave(authToken,userGame.gameID());
 
         userColor = null;
         userGame = null;
         gameState = GameState.OUTGAME;
-        return "you're not in the game anymore\n";
+        updateGameList(authToken);
+        return "you've successfully left the game.\n";
     }
-    public String findMoves(String... params) {
-        return null;
+    public String findMoves(String... params) throws ClientException {
+        String chessPieceString = params[0];
+        ChessPosition piece = getPositionFromInput(chessPieceString);
+        Collection<ChessMove> possibleMoves = userGame.game().validMoves(piece);
+        if(userColor.equals("BLACK")) {
+            BoardPrinter.drawBoard(userGame.game(), ChessGame.TeamColor.BLACK, possibleMoves);
+        } else {
+            BoardPrinter.drawBoard(userGame.game(), ChessGame.TeamColor.WHITE, possibleMoves);
+        }
+        return "";
     }
     public String redraw() {
         if(userColor.equals("WHITE")) {
-            BoardPrinter.drawBoard(userGame.game(), ChessGame.TeamColor.WHITE);
+            BoardPrinter.drawBoard(userGame.game(), ChessGame.TeamColor.WHITE, null);
         } else {
-            BoardPrinter.drawBoard(userGame.game(), ChessGame.TeamColor.BLACK);
+            BoardPrinter.drawBoard(userGame.game(), ChessGame.TeamColor.BLACK, null);
         }
         return "";
     }
@@ -315,6 +329,10 @@ public class ChessClient implements ServiceMessageHandler {
             black = curGame.blackUsername();
         }
         return String.format("\n%d.) Game: %s | White: %s | Black: %s",gameNumber,name,white,black);
+    }
+    public void updateGameList(String authToken) throws ClientException {
+        ListGamesRequest listGamesRequest = new ListGamesRequest(authToken);
+        lastListedGames = server.listGame(listGamesRequest).games();
     }
     private void printPrompt() {
         System.out.print(">>> ");
@@ -338,14 +356,29 @@ public class ChessClient implements ServiceMessageHandler {
             throw new ClientException("Make sure you enter join <Game Number from List Games>");
         }
     }
-    private ChessMove verifyUserChessMove(String startPositionString, String endPositionString,
+    private ChessMove verifyUserChessMove(String start, String end,
                                           ChessPiece.PieceType promotionPiece) throws ClientException {
 
-        String startPositionColString = String.valueOf(startPositionString.charAt(0)).toUpperCase();
-        int startPositionRow = Integer.parseInt(String.valueOf(startPositionString.charAt(1)));
-        
-        String endPositionColString = String.valueOf(endPositionString.charAt(0)).toUpperCase();
-        int endPositionRow = Integer.parseInt(String.valueOf(endPositionString.charAt(1)));
+        ChessPosition startPosition = getPositionFromInput(start);
+        ChessPosition endPosition = getPositionFromInput(end);
+
+//            check to see if it's a valid move
+        ChessBoard chessBoard = userGame.game().getBoard();
+        ChessPiece chessPiece = chessBoard.getPiece(startPosition);
+        Collection<ChessMove> possibleMoves = chessPiece.pieceMoves(chessBoard,startPosition);
+
+        ChessMove desiredMove = new ChessMove(startPosition,endPosition, promotionPiece);
+
+        if(possibleMoves.contains(desiredMove)) {
+            return desiredMove;
+        } else {
+            throw new ClientException("Remember, make move uses letters from A-H and numbers 1-8 to make moves \n" +
+                    "Example: move <starting>a2 <ending>a3 <piece you want to promote>(optional)");
+        }
+    }
+    public ChessPosition getPositionFromInput(String chessPosition) throws ClientException {
+        String row = String.valueOf(chessPosition.charAt(0)).toUpperCase();
+        int col = Integer.parseInt(String.valueOf(chessPosition.charAt(1)));
 
         Map<String, Integer> numbermap = Map.of(
                 "A", 1, "B", 2, "C", 3,
@@ -353,35 +386,14 @@ public class ChessClient implements ServiceMessageHandler {
                 "G", 7, "H", 8
         );
 
-        boolean startPosBoolRow = startPositionRow <= 8 && startPositionRow >= 1;
-        boolean endPosBoolRow = endPositionRow <= 8 && endPositionRow >= 1;
-        boolean startPosBoolCol = numbermap.containsKey(startPositionColString);
-        boolean endPosBoolCol = numbermap.containsKey(endPositionColString);
-
-        if (startPosBoolCol && startPosBoolRow && endPosBoolCol && endPosBoolRow) {
-            int startPositionCol = numbermap.get(startPositionColString);
-            int endPositionCol = numbermap.get(endPositionColString);
-
-            ChessPosition startPosition = new ChessPosition(startPositionRow,startPositionCol);
-            ChessPosition endPosition = new ChessPosition(endPositionRow,endPositionCol);
-
-//            check to see if it's a valid move
-            ChessBoard chessBoard = userGame.game().getBoard();
-            ChessPiece chessPiece = chessBoard.getPiece(startPosition);
-            Collection<ChessMove> possibleMoves = chessPiece.pieceMoves(chessBoard,startPosition);
-
-            ChessMove desiredMove = new ChessMove(startPosition,endPosition, promotionPiece);
-
-            if(possibleMoves.contains(desiredMove)) {
-                return desiredMove;
-            } else {
-                throw new ClientException("Remember, make move uses letters from A-H and numbers 1-8 to make moves \n" +
-                        "Example: move <starting>a2 <ending>a3 <piece you want to promote>(optional)");
-            }
-
+        if(numbermap.containsKey(row) && col >= 1 && col <= 8) {
+            return new ChessPosition(col,numbermap.get(row));
         } else {
-            throw new ClientException("Remember, make move uses letters from A-H and numbers 1-8 to make moves \n" +
-                    "Example: move <starting>a2 <ending>a3 <piece you want to promote>(optional)");
+            throw new ClientException("""
+                    Remember, the chess squares are letters from A-H and numbers 1-8. +
+                    Example: move <starting>a2 <ending>a3 <piece you want to promote>(optional)
+                    
+                    """);
         }
     }
 

@@ -67,7 +67,7 @@ public class ServerFacade {
         try {
             return client.send(request,HttpResponse.BodyHandlers.ofString());
         } catch (Exception ex) {
-            throw new ClientException("Bad Request");
+            throw new ClientException("Sorry, something went wrong\n");
         }
     }
 
@@ -95,9 +95,13 @@ public class ServerFacade {
         if (!isSuccessful(status)) {
             var body = response.body();
             if (body != null) {
-                throw new ClientException("Bad input, try again");
+                var errorResponse = new Gson().fromJson(body, ErrorResponse.class);
+                if (errorResponse != null && errorResponse.message != null) {
+                    throw new ClientException(errorResponse.message);
+                }
+                throw new ClientException(body);
             }
-            throw new ClientException("Bad input, try again");
+            throw new ClientException("Bad input, try again\n");
         }
 
         if (responseClass != null) {
@@ -109,5 +113,8 @@ public class ServerFacade {
 
     private boolean isSuccessful(int status) {
         return status / 100 == 2;
+    }
+    private static class ErrorResponse {
+        String message;
     }
 }

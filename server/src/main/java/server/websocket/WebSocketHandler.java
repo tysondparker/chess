@@ -10,10 +10,7 @@ import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import io.javalin.websocket.*;
 import org.jetbrains.annotations.NotNull;
-import websocket.commands.LeaveCommand;
-import websocket.commands.MakeMoveCommand;
-import websocket.commands.ResignCommand;
-import websocket.commands.UserGameCommand;
+import websocket.commands.*;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
@@ -48,7 +45,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         try {
             UserGameCommand userGameCommand = new Gson().fromJson(ctx.message(), UserGameCommand.class);
             switch (userGameCommand.getCommandType()) {
-                case CONNECT -> connect(userGameCommand, ctx.session);
+                case CONNECT -> {
+                    ConnectCommand connectCommand = new Gson().fromJson(ctx.message(), ConnectCommand.class);
+                    connect(connectCommand, ctx.session);
+                }
                 case MAKE_MOVE -> {
                     MakeMoveCommand makeMoveCommand = new Gson().fromJson(ctx.message(), MakeMoveCommand.class);
                     makeMove(makeMoveCommand, ctx.session);
@@ -58,12 +58,14 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                     resign(resignCommand, ctx.session);
                 }
                 case LEAVE -> {
+                    System.out.println("leave handler");
                     LeaveCommand leaveCommand = new Gson().fromJson(ctx.message(), LeaveCommand.class);
                     leave(leaveCommand, ctx.session);
                 }
             }
         } catch (Exception ex) {
             try {
+                System.out.println("WebSocket error: " + ex.getMessage());
                 connections.notify(ctx.session, new ErrorMessage("Error: " + ex.getMessage()));
             } catch (IOException ignored) {
             }
@@ -75,7 +77,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         System.out.println("Websocket closed");
     }
 
-    private void connect(UserGameCommand command, Session session) throws Exception {
+    private void connect(ConnectCommand command, Session session) throws Exception {
+        System.out.println("We got inside Connect in WebSocketHandler");
         AuthData authData = dataAccess.getAuth(command.getAuthToken());
 
         if(authData == null) {
@@ -95,6 +98,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         connections.add(username, command.getGameID(), session);
 
         LoadGameMessage loadGameMessage = new LoadGameMessage(gameData.game());
+        System.out.println("Load message");
         connections.notify(session, loadGameMessage);
 
         String note;
@@ -106,8 +110,9 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             note = username + " joined as an observer";
             this.observers.add(username);
         }
-
+        System.out.println("About to Broadcast");
         connections.broadcast(gameData.gameID(), session, new NotificationMessage(note));
+        System.out.println("Broadcasted");
     }
 
     private void makeMove(MakeMoveCommand command, Session session) throws Exception {
@@ -156,7 +161,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
         try{
             game.makeMove(userMove);
-        } catch (InvalidMoveException e) {
+        } catch (Exception e) {
             connections.notify(session, new ErrorMessage("Hey, that's not an approved move silly"));
             return;
         }
@@ -166,8 +171,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
         connections.broadcast(updatedGame.gameID(), null, new LoadGameMessage(game));
 
-        NotificationMessage notificationMessage = getMessageForClient(command, username);
-        connections.broadcast(updatedGame.gameID(),session,notificationMessage);
+        if(command.getMove() != null) {
+            NotificationMessage notificationMessage = getMessageForClient(command, username);
+            connections.broadcast(updatedGame.gameID(), session, notificationMessage);
+        }
 
         ChessGame.TeamColor opponentColor = ChessGame.TeamColor.WHITE;
         NotificationMessage message;

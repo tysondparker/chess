@@ -3,10 +3,7 @@ import chess.ChessMove;
 import client.WebSocketException;
 import com.google.gson.Gson;
 import jakarta.websocket.*;
-import websocket.commands.LeaveCommand;
-import websocket.commands.MakeMoveCommand;
-import websocket.commands.ResignCommand;
-import websocket.commands.UserGameCommand;
+import websocket.commands.*;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
@@ -29,29 +26,38 @@ public class WebSocketFacade extends Endpoint {
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             this.session = container.connectToServer(this, socketURI);
 
-            //set message handler
-            setMessageHandler();
+            this.session.addMessageHandler(new MessageHandler.Whole<String>() {
+                @Override
+                public void onMessage(String message) {
+                    ServerMessage baseMessage = new Gson().fromJson(message, ServerMessage.class);
+                    switch (baseMessage.getServerMessageType()) {
+                        case LOAD_GAME -> serviceMessageHandler.notify(new Gson().fromJson(message, LoadGameMessage.class));
+                        case NOTIFICATION -> serviceMessageHandler.notify(new Gson().fromJson(message, NotificationMessage.class));
+                        case ERROR -> serviceMessageHandler.notify(new Gson().fromJson(message, ErrorMessage.class));
+                    }
+                }
+            });
         } catch (Exception ex) {
-            throw new WebSocketException("Couldn't connect to Server.");
+            throw new WebSocketException("Couldn't connect to Server.\n");
         }
     }
 
-
     @Override
-    public void onOpen(Session session, EndpointConfig endpointConfig) {}
+    public void onOpen(Session session, EndpointConfig endpointConfig) {
+        this.session = session;
+//        setMessageHandler();
+    }
 
     public void connect(String authToken, int gameId) throws WebSocketException {
-        System.out.println("Connected to Server");
         try {
-            UserGameCommand userGameCommand = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameId);
-            this.session.getBasicRemote().sendText(new Gson().toJson(userGameCommand));
+            ConnectCommand connectCommand = new ConnectCommand(authToken, gameId);
+            this.session.getBasicRemote().sendText(new Gson().toJson(connectCommand));
         } catch (IOException ex){
             throw new WebSocketException("Sorry champ, I couldn't connect");
         }
     }
 
     public void makeMove(String authToken, int gameId, ChessMove move) throws WebSocketException {
-        System.out.println("Inside Make Move");
         try {
             MakeMoveCommand command = new MakeMoveCommand(authToken, gameId, move);
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
@@ -71,33 +77,11 @@ public class WebSocketFacade extends Endpoint {
     }
 
     public void leave(String authToken, int gameId) {
-        System.out.println("Inside leave");
         try {
             LeaveCommand leaveCommand = new LeaveCommand(authToken,gameId);
             this.session.getBasicRemote().sendText(new Gson().toJson(leaveCommand));
         } catch(Exception ex) {
             throw new WebSocketException("Sorry, couldn't connect");
         }
-    }
-
-    public void setMessageHandler() {
-        this.session.addMessageHandler((MessageHandler.Whole<String>) message -> {
-            ServerMessage baseMessage = new Gson().fromJson(message, ServerMessage.class);
-
-            switch (baseMessage.getServerMessageType()) {
-                case LOAD_GAME -> {
-                    LoadGameMessage loadGameMessage = new Gson().fromJson(message, LoadGameMessage.class);
-                    serviceMessageHandler.notify(loadGameMessage);
-                }
-                case NOTIFICATION -> {
-                    NotificationMessage notificationMessage = new Gson().fromJson(message, NotificationMessage.class);
-                    serviceMessageHandler.notify(notificationMessage);
-                }
-                case ERROR -> {
-                    ErrorMessage errorMessage = new Gson().fromJson(message, ErrorMessage.class);
-                    serviceMessageHandler.notify(errorMessage);
-                }
-            }
-        });
     }
 }

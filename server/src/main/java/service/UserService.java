@@ -19,10 +19,10 @@ public class UserService {
 
     public RegisterResult register(@NotNull RegisterRequest request) throws DataAccessException {
         if ((request.username() == null || request.password() == null || request.email() == null)) {
-            throw new BadRequestException("Error: bad request");
+            throw new BadRequestException("You need to enter something\n");
         }
         if (dataAccess.getUser(request.username()) != null) {
-            throw new AlreadyTakenException("Error: already taken");
+            throw new AlreadyTakenException("Error: already taken\n");
         }
 
         String requestPassword = BCrypt.hashpw(request.password(), BCrypt.gensalt());

@@ -1,9 +1,13 @@
 package ui;
 import chess.*;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 public class BoardPrinter {
 
-    public static void drawBoard(ChessGame game, ChessGame.TeamColor color){
+    public static void drawBoard(ChessGame game, ChessGame.TeamColor color, Collection<ChessMove> possibleMoves){
         System.out.print("\n");
 //        Set up the board
         ChessBoard board = game.getBoard();
@@ -39,13 +43,36 @@ public class BoardPrinter {
         System.out.print(EscapeSequences.RESET_PARAMS);
         System.out.println();
 
+        Collection<ChessPosition> validPositions = new ArrayList<>();
+        ChessPosition pieceSquare = null;
+
+        if(possibleMoves != null){
+
+            boolean first = true;
+
+            for (ChessMove move : possibleMoves) {
+                if(first) {
+                    pieceSquare = move.getStartPosition();
+                    first = false;
+                }
+                validPositions.add(move.getEndPosition());
+
+            }
+        }
+
 //        Print row and col one at a time
         for(int row = rowStart; true; row += rowStep) {
             printRowLabel(row);
             for (int col = colStart; true; col += colStep) {
-                ChessPiece piece = board.getPiece(new ChessPosition(row,col));
-                boolean evenSquare = ((row + col) % 2 == 0);
-                makeSquare(piece,evenSquare);
+                ChessPosition curPosition = new ChessPosition(row,col);
+                ChessPiece piece = board.getPiece(curPosition);
+
+                if(!validPositions.isEmpty() && (validPositions.contains(curPosition) || (pieceSquare.equals(curPosition)))) {
+                    makeSpecialSquare(piece);
+                } else {
+                    boolean evenSquare = ((row + col) % 2 == 0);
+                    makeSquare(piece, evenSquare);
+                }
                 if (col == colEnd) {
                     break;
                 }
@@ -76,6 +103,14 @@ public class BoardPrinter {
         System.out.println();
 
     }
+
+    private static void makeSpecialSquare(ChessPiece piece) {
+        String backGroundColor;
+        backGroundColor = EscapeSequences.SET_BG_COLOR_LIGHT_GREY;
+        System.out.print(backGroundColor);
+        System.out.print(pieceString(piece));
+    }
+
     private static void makeSquare(ChessPiece piece, boolean evenSquare) {
         String backGroundColor;
         if(evenSquare){
@@ -119,4 +154,5 @@ public class BoardPrinter {
         System.out.print(" "+row+" ");
         System.out.print(EscapeSequences.RESET_PARAMS);
     }
+
 }
